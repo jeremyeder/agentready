@@ -1,0 +1,97 @@
+"""LLM response caching to avoid redundant API calls."""
+
+import hashlib
+import json
+import logging
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from agentready.models import DiscoveredSkill
+
+logger = logging.getLogger(__name__)
+
+
+class LLMCache:
+    """Caches LLM enrichment responses."""
+
+    def __init__(self, cache_dir: Path, ttl_days: int = 7):
+        """Initialize cache.
+
+        Args:
+            cache_dir: Directory to store cache files
+            ttl_days: Time-to-live in days (default: 7)
+        """
+        self.cache_dir = cache_dir
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.ttl_days = ttl_days
+
+    def get(self, cache_key: str) -> DiscoveredSkill | None:
+        """Get cached skill if exists and not expired.
+
+        Args:
+            cache_key: Unique cache key
+
+        Returns:
+            Cached DiscoveredSkill or None if miss/expired
+        """
+        cache_file = self.cache_dir / f"{cache_key}.json"
+
+        if not cache_file.exists():
+            logger.debug(f"Cache miss: {cache_key}")
+            return None
+
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            # Check expiration
+            cached_at = datetime.fromisoformat(data["cached_at"])
+            if datetime.now() - cached_at > timedelta(days=self.ttl_days):
+                logger.info(f"Cache expired: {cache_key}")
+                cache_file.unlink()  # Delete expired cache
+                return None
+
+            logger.info(f"Cache hit: {cache_key}")
+            return DiscoveredSkill(**data["skill"])
+
+        except Exception as e:
+            logger.warning(f"Cache read error for {cache_key}: {e}")
+            return None
+
+    def set(self, cache_key: str, skill: DiscoveredSkill):
+        """Save skill to cache.
+
+        Args:
+            cache_key: Unique cache key
+            skill: DiscoveredSkill to cache
+        """
+        cache_file = self.cache_dir / f"{cache_key}.json"
+
+        try:
+            data = {
+                "cached_at": datetime.now().isoformat(),
+                "skill": skill.to_dict(),
+            }
+
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+
+            logger.debug(f"Cached: {cache_key}")
+
+        except Exception as e:
+            logger.warning(f"Cache write error for {cache_key}: {e}")
+
+    @staticmethod
+    def generate_key(attribute_id: str, score: float, evidence_hash: str) -> str:
+        """Generate cache key from finding attributes.
+
+        Args:
+            attribute_id: Attribute ID (e.g., "claude_md_file")
+            score: Finding score
+            evidence_hash: Hash of evidence list
+
+        Returns:
+            Cache key string
+        """
+        key_data = f"{attribute_id}_{score}_{evidence_hash}"
+        return hashlib.sha256(key_data.encode()).hexdigest()[:16]
