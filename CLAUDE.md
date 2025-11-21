@@ -40,6 +40,80 @@ agentready assess /path/to/repo --output-dir ./reports
 
 ---
 
+## Continuous Learning Loop (LLM-Powered)
+
+**NEW in v1.1**: Extract high-quality skills from assessments using Claude API
+
+The `learn` command analyzes assessment results to identify successful patterns and generates Claude Code skills. With `--enable-llm`, it uses Claude Sonnet 4.5 to create detailed, context-aware skill documentation.
+
+### Basic Usage (Heuristic)
+
+```bash
+# Extract skills using heuristic pattern extraction
+agentready learn .
+
+# Generate SKILL.md files
+agentready learn . --output-format skill_md
+
+# Create GitHub issue templates
+agentready learn . --output-format github_issues
+```
+
+### LLM-Powered Enrichment
+
+```bash
+# Set API key
+export ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# Extract skills with LLM enrichment (top 5 skills)
+agentready learn . --enable-llm
+
+# Enrich more skills with custom budget
+agentready learn . --enable-llm --llm-budget 10
+
+# Bypass cache for fresh analysis
+agentready learn . --enable-llm --llm-no-cache
+
+# Generate all formats with LLM enrichment
+agentready learn . --enable-llm --output-format all
+```
+
+### LLM Enrichment Features
+
+**What it does**:
+- Analyzes repository code samples for real examples
+- Generates 5-10 step detailed instructions
+- Extracts file paths and code snippets from actual implementation
+- Derives best practices from high-scoring attributes
+- Identifies anti-patterns to avoid
+
+**How it works**:
+1. Heuristics extract basic skills from assessment findings
+2. Top N skills (default: 5) are sent to Claude API
+3. Code sampler provides relevant files from repository
+4. Claude analyzes patterns and generates structured JSON
+5. Enriched skills merged with detailed instructions/examples
+6. Results cached for 7 days to reduce API costs
+
+**Caching**:
+- Responses cached in `.agentready/llm-cache/`
+- 7-day TTL (time-to-live)
+- Cache key based on attribute + score + evidence hash
+- Use `--llm-no-cache` to force fresh API calls
+
+**Cost Control**:
+- `--llm-budget N` limits enrichment to top N skills
+- Default: 5 skills (approximately 5-10 API calls)
+- Each enrichment: ~2-6 seconds, ~2000-4000 tokens
+- Caching prevents redundant calls on repeated assessments
+
+**Graceful Fallback**:
+- Missing API key → falls back to heuristic skills
+- API errors → uses original heuristic skill
+- Rate limits → retries with exponential backoff
+
+---
+
 ## Architecture
 
 ### Core Components
@@ -48,6 +122,7 @@ agentready assess /path/to/repo --output-dir ./reports
 src/agentready/
 ├── models/          # Data models (Repository, Attribute, Finding, Assessment)
 ├── services/        # Scanner orchestration and language detection
+│   └── llm_cache.py # LLM response caching (7-day TTL)
 ├── assessors/       # Attribute assessment implementations
 │   ├── base.py      # BaseAssessor abstract class
 │   ├── documentation.py   # CLAUDE.md, README assessors
@@ -55,13 +130,20 @@ src/agentready/
 │   ├── testing.py         # Test coverage, pre-commit hooks
 │   ├── structure.py       # Standard layout, gitignore
 │   └── stub_assessors.py  # 15 not-yet-implemented assessors
+├── learners/        # Pattern extraction and LLM enrichment
+│   ├── pattern_extractor.py  # Heuristic skill extraction
+│   ├── skill_generator.py    # SKILL.md generation
+│   ├── code_sampler.py       # Repository code sampling
+│   ├── llm_enricher.py       # Claude API integration
+│   └── prompt_templates.py   # LLM prompt engineering
 ├── reporters/       # Report generation (HTML, Markdown, JSON)
 │   ├── html.py      # Interactive HTML with Jinja2
 │   └── markdown.py  # GitHub-Flavored Markdown
 ├── templates/       # Jinja2 templates
 │   └── report.html.j2  # Self-contained HTML report (73KB)
 └── cli/             # Click-based CLI
-    └── main.py      # assess, research-version, generate-config commands
+    ├── main.py      # assess, research-version, generate-config commands
+    └── learn.py     # Continuous learning loop with LLM enrichment
 ```
 
 ### Data Flow
@@ -192,6 +274,7 @@ agentready/
 - **Python 3.11+** (only N and N-1 versions supported)
 - **Click** - CLI framework
 - **Jinja2** - HTML template engine
+- **Anthropic** - Claude API client (for LLM enrichment)
 - **Pytest** - Testing framework
 - **Black** - Code formatter
 - **isort** - Import sorter
@@ -290,6 +373,7 @@ See `BACKLOG.md` for full feature list.
 
 ## Related Documents
 
+- **.github/CLAUDE_INTEGRATION.md** - Dual Claude integration guide (automated + interactive)
 - **BACKLOG.md** - Future features and enhancements (11 items)
 - **GITHUB_ISSUES.md** - GitHub-ready issue templates
 - **README.md** - User-facing documentation

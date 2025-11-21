@@ -1,9 +1,10 @@
 """Assessment model representing complete repository evaluation."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from .config import Config
+from .discovered_skill import DiscoveredSkill
 from .finding import Finding
 from .repository import Repository
 
@@ -23,6 +24,7 @@ class Assessment:
         findings: Individual attribute results
         config: Custom configuration used (if any)
         duration_seconds: Time taken for assessment
+        discovered_skills: Patterns extracted from this assessment (optional)
     """
 
     repository: Repository
@@ -35,6 +37,7 @@ class Assessment:
     findings: list[Finding]
     config: Config | None
     duration_seconds: float
+    discovered_skills: list[DiscoveredSkill] = field(default_factory=list)
 
     VALID_LEVELS = {"Platinum", "Gold", "Silver", "Bronze", "Needs Improvement"}
 
@@ -77,6 +80,7 @@ class Assessment:
             "findings": [f.to_dict() for f in self.findings],
             "config": self.config.to_dict() if self.config else None,
             "duration_seconds": self.duration_seconds,
+            "discovered_skills": [s.to_dict() for s in self.discovered_skills],
         }
 
     @staticmethod

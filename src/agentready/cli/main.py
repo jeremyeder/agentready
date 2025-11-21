@@ -27,6 +27,8 @@ from ..reporters.markdown import MarkdownReporter
 from ..services.research_loader import ResearchLoader
 from ..services.scanner import Scanner
 from .bootstrap import bootstrap
+from .demo import demo
+from .learn import learn
 
 
 def create_all_assessors():
@@ -117,7 +119,7 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
     repo_path = Path(repository_path).resolve()
 
     if verbose:
-        click.echo(f"AgentReady Repository Scorer")
+        click.echo("AgentReady Repository Scorer")
         click.echo(f"{'=' * 50}\n")
 
     # Load configuration if provided
@@ -200,7 +202,7 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
     if verbose:
         click.echo(f"\n{'=' * 50}")
 
-    click.echo(f"\nAssessment complete!")
+    click.echo("\nAssessment complete!")
     click.echo(
         f"  Score: {assessment.overall_score:.1f}/100 ({assessment.certification_level})"
     )
@@ -209,7 +211,7 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
     )
     click.echo(f"  Skipped: {assessment.attributes_skipped}")
     click.echo(f"  Duration: {assessment.duration_seconds:.1f}s")
-    click.echo(f"\nReports generated:")
+    click.echo("\nReports generated:")
     click.echo(f"  JSON: {json_file}")
     click.echo(f"  HTML: {html_file}")
     click.echo(f"  Markdown: {markdown_file}")
@@ -280,8 +282,10 @@ def generate_config():
     click.echo("Edit this file to customize weights and behavior.")
 
 
-# Register bootstrap command
+# Register commands
 cli.add_command(bootstrap)
+cli.add_command(demo)
+cli.add_command(learn)
 
 
 def show_version():
