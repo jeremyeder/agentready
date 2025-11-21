@@ -6,6 +6,103 @@
 
 ## Critical Issues (P0)
 
+### Fix Critical Security & Logic Bugs from Code Review
+
+**Priority**: P0 (Critical - Security & Correctness)
+
+**Description**: Address critical bugs discovered in code review that affect security and assessment accuracy.
+
+**Issues to Fix**:
+
+1. **XSS Vulnerability in HTML Reports** (CRITICAL - Security)
+   - **Location**: `src/agentready/templates/report.html.j2:579`
+   - **Problem**: `assessment_json|safe` disables autoescaping for JSON embedded in JavaScript
+   - **Risk**: Repository names, commit messages, file paths from git could contain malicious content
+   - **Fix**: Replace with `JSON.parse({{ assessment_json|tojson }})`
+   - **Add**: Content Security Policy headers to HTML reports
+
+2. **StandardLayoutAssessor Logic Bug** (CRITICAL - Incorrect Scoring)
+   - **Location**: `src/agentready/assessors/structure.py:48`
+   - **Problem**: `(repository.path / "tests") or (repository.path / "test")` always evaluates to first path
+   - **Impact**: Projects with `test/` instead of `tests/` scored incorrectly
+   - **Fix**: Check both paths properly:
+     ```python
+     tests_path = repository.path / "tests"
+     if not tests_path.exists():
+         tests_path = repository.path / "test"
+     has_tests = tests_path.exists()
+     ```
+
+**Implementation**:
+
+**File 1**: `src/agentready/templates/report.html.j2`
+```jinja2
+<!-- BEFORE (VULNERABLE): -->
+const ASSESSMENT = {{ assessment_json|safe }};
+
+<!-- AFTER (SECURE): -->
+const ASSESSMENT = JSON.parse({{ assessment_json|tojson }});
+```
+
+**File 2**: `src/agentready/assessors/structure.py`
+```python
+# BEFORE (BUGGY):
+standard_dirs = {
+    "src": repository.path / "src",
+    "tests": (repository.path / "tests") or (repository.path / "test"),  # BUG!
+}
+
+# AFTER (CORRECT):
+standard_dirs = {
+    "src": repository.path / "src",
+}
+
+# Check for tests directory (either tests/ or test/)
+tests_path = repository.path / "tests"
+if not tests_path.exists():
+    tests_path = repository.path / "test"
+standard_dirs["tests"] = tests_path
+```
+
+**Test Cases to Add**:
+```python
+def test_xss_in_repository_name():
+    """Test that malicious repo names are escaped in HTML."""
+    repo = Repository(
+        name="<script>alert('xss')</script>",
+        # ...
+    )
+    html = HTMLReporter().generate(assessment, output)
+    assert "<script>" not in html  # Should be escaped
+
+def test_standard_layout_with_test_dir():
+    """Test that 'test/' directory is recognized (not just 'tests/')."""
+    # Create repo with test/ directory only
+    repo_path = tmp_path / "repo"
+    (repo_path / "test").mkdir(parents=True)
+
+    assessor = StandardLayoutAssessor()
+    finding = assessor.assess(Repository(...))
+    assert finding.status == "pass"  # Should recognize test/ dir
+```
+
+**Acceptance Criteria**:
+- [ ] XSS vulnerability patched with `tojson` filter
+- [ ] CSP headers added to HTML reports (future)
+- [ ] StandardLayoutAssessor recognizes both `tests/` and `test/`
+- [ ] Tests added for XSS prevention
+- [ ] Tests added for both test directory naming patterns
+- [ ] All existing tests still pass
+
+**Priority Justification**:
+- **Security**: XSS is a P0 vulnerability
+- **Correctness**: Incorrect scoring undermines tool credibility
+- **Quick fixes**: Both are 5-10 minute changes
+
+**Related**: Issue #2 (Report improvements), Bootstrap (#1 - needs secure reports)
+
+---
+
 ### Bootstrap AgentReady Repository on GitHub
 
 **Priority**: P0 (Critical - Dogfooding)
@@ -673,6 +770,202 @@ custom_theme:
 - Consider colorblind-friendly palettes (Viridis, ColorBrewer)
 - Custom themes should be shareable (export/import)
 - Could add theme gallery in documentation
+
+---
+
+### Fix Code Quality Issues from Code Review
+
+**Priority**: P1 (High - Quality & Reliability)
+
+**Description**: Address P1 issues discovered in code review that affect reliability, accuracy, and code quality.
+
+**Issues to Fix**:
+
+1. **TOCTOU (Time-of-Check-Time-of-Use) in File Operations**
+   - **Location**: Multiple assessors (`documentation.py:46-50`, `documentation.py:174-191`)
+   - **Problem**: Check if file exists, then read in separate operation - file could be deleted in between
+   - **Impact**: Crashes instead of graceful degradation
+   - **Fix**: Use try-except around file reads instead of existence checks
+   ```python
+   # BEFORE:
+   if claude_md_path.exists():
+       size = claude_md_path.stat().st_size
+
+   # AFTER:
+   try:
+       with open(claude_md_path, "r") as f:
+           size = len(f.read())
+   except FileNotFoundError:
+       return Finding(...status="fail"...)
+   except OSError as e:
+       return Finding.error(self.attribute, f"Could not read: {e}")
+   ```
+
+2. **Inaccurate Type Annotation Detection**
+   - **Location**: `src/agentready/assessors/code_quality.py:98-102`
+   - **Problem**: Regex-based detection has false positives (string literals, dict literals)
+   - **Impact**: Inflated type annotation coverage scores
+   - **Fix**: Use AST parsing instead of regex:
+   ```python
+   import ast
+   tree = ast.parse(content)
+   for node in ast.walk(tree):
+       if isinstance(node, ast.FunctionDef):
+           total_functions += 1
+           has_annotations = (node.returns is not None or
+                            any(arg.annotation for arg in node.args.args))
+           if has_annotations:
+               typed_functions += 1
+   ```
+
+3. **Assessment Validation Semantic Confusion**
+   - **Location**: `src/agentready/models/assessment.py:54-59`
+   - **Problem**: Field named `attributes_skipped` but includes `error` and `not_applicable` statuses
+   - **Impact**: Confusing API, unclear semantics
+   - **Fix**: Rename to `attributes_not_assessed` OR add separate counters
+
+**Acceptance Criteria**:
+- [ ] All file operations use try-except pattern
+- [ ] Type annotation detection uses AST parsing
+- [ ] Assessment model fields clearly named
+- [ ] Tests added for TOCTOU edge cases
+- [ ] Tests added for type annotation false positives
+- [ ] Documentation updated
+
+**Priority Justification**: These affect reliability and measurement accuracy - critical for a quality assessment tool.
+
+**Related**: Testing improvements, code quality
+
+---
+
+### Improve Test Coverage and Edge Case Handling
+
+**Priority**: P1 (High - Quality Assurance)
+
+**Description**: Increase test coverage from 37% to >80% and add tests for critical edge cases discovered in code review.
+
+**Critical Test Gaps**:
+
+1. **Error Handling Paths** (Currently 0% coverage)
+   - OSError, PermissionError in file operations
+   - MissingToolError in assessors
+   - Invalid repository paths
+   - Malformed git repositories
+
+2. **Edge Cases** (No tests)
+   - Empty repositories
+   - Binary files instead of text
+   - Symlinks in repository
+   - Very large repositories (>10k files)
+   - Repositories with `test/` vs `tests/` directories
+
+3. **Security Test Cases**
+   - XSS in repository names, commit messages
+   - Path traversal attempts
+   - Malicious file names
+
+4. **Scorer Edge Cases**
+   - All attributes skipped (score should be 0.0)
+   - Config weights don't sum to 1.0
+   - Division by zero scenarios
+
+**Implementation**:
+```python
+# tests/unit/test_edge_cases.py
+def test_empty_repository(tmp_path):
+    """Test assessment of completely empty repository."""
+    # Create empty git repo
+    repo = Repository(path=tmp_path, ...)
+    scanner = Scanner(repo, config=None)
+    assessment = scanner.scan(assessors)
+    # Should not crash, should have valid score
+    assert 0.0 <= assessment.overall_score <= 100.0
+
+def test_permission_denied_file(tmp_path):
+    """Test graceful handling of permission errors."""
+    # Create unreadable file
+    restricted = tmp_path / "CLAUDE.md"
+    restricted.write_text("test")
+    restricted.chmod(0o000)
+
+    assessor = CLAUDEmdAssessor()
+    finding = assessor.assess(Repository(...))
+    assert finding.status == "error"
+    assert "permission" in finding.error_message.lower()
+
+def test_binary_file_as_readme(tmp_path):
+    """Test handling of binary files."""
+    readme = tmp_path / "README.md"
+    readme.write_bytes(b"\x00\x01\x02\x03")
+
+    assessor = READMEAssessor()
+    finding = assessor.assess(Repository(...))
+    # Should not crash
+```
+
+**Acceptance Criteria**:
+- [ ] Test coverage increased to >80%
+- [ ] All error handling paths tested
+- [ ] Edge cases for empty/malformed repos covered
+- [ ] Security test cases added
+- [ ] Integration tests for complete workflows
+- [ ] CI runs coverage report and fails <75%
+
+**Priority Justification**: Quality assessment tool must be thoroughly tested. Current 37% coverage is unacceptable.
+
+**Related**: CI/CD improvements, reliability
+
+---
+
+### Add Security & Quality Improvements from Code Review
+
+**Priority**: P2 (Medium - Polish)
+
+**Description**: Address P2 improvements from code review for better UX and robustness.
+
+**Improvements**:
+
+1. **Input Validation Warnings**
+   - Warn when scanning sensitive directories (`/etc`, `/.ssh`, `/var`)
+   - Confirm before scanning large repositories (>10k files)
+
+2. **Scorer Semantic Clarity**
+   - Document behavior when all attributes skipped (returns 0.0)
+   - Consider returning `None` or special value for "not assessable"
+   - Add explicit documentation of edge cases
+
+3. **Content Security Policy Headers**
+   - Add CSP to HTML reports for defense-in-depth
+   - Prevent inline script execution
+   - Whitelist only necessary sources
+
+**Implementation**:
+```python
+# In CLI
+sensitive_dirs = ['/etc', '/sys', '/proc', '/.ssh', '/var']
+if any(str(repo_path).startswith(p) for p in sensitive_dirs):
+    click.confirm(
+        f"Warning: Scanning sensitive directory {repo_path}. Continue?",
+        abort=True
+    )
+
+# In HTMLReporter
+csp_header = (
+    "<meta http-equiv='Content-Security-Policy' "
+    "content=\"default-src 'self'; script-src 'unsafe-inline'; "
+    "style-src 'unsafe-inline'\">"
+)
+```
+
+**Acceptance Criteria**:
+- [ ] Warnings for sensitive directories
+- [ ] CSP headers in HTML reports
+- [ ] Scorer edge cases documented
+- [ ] User guide updated with best practices
+
+**Priority Justification**: UX polish and defense-in-depth, not critical bugs.
+
+**Related**: User experience, security hardening
 
 ---
 
@@ -1384,12 +1677,12 @@ github:
 
 **Created**: 2025-11-21
 **Last Updated**: 2025-11-21
-**Total Items**: 11
+**Total Items**: 14 (11 original + 3 from code review)
 
 ## Priority Summary
 
-- **P0 (Critical)**: 3 items - Bootstrap Command (FIRST!), Report Header Metadata, HTML Design Improvements
-- **P1 (Critical)**: 1 item - Align Subcommand
-- **P2 (High Value)**: 2 items - Interactive Dashboard, GitHub App Integration
+- **P0 (Critical)**: 4 items - Security/Logic Bugs (FIX FIRST!), Bootstrap Command, Report Header Metadata, HTML Design Improvements
+- **P1 (Critical)**: 4 items - Code Quality Fixes, Test Coverage Improvements, Align Subcommand
+- **P2 (High Value)**: 3 items - Security Polish, Interactive Dashboard, GitHub App Integration
 - **P3 (Important)**: 2 items - Report Schema Versioning, AgentReady Repository Agent
 - **P4 (Enhancement)**: 3 items - Research Report Utility, Repomix Integration, Customizable Themes
