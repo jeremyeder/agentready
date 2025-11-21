@@ -297,7 +297,7 @@ class CyclomaticComplexityAssessor(BaseAssessor):
             if "Average complexity:" in output:
                 # Extract average value
                 avg_line = [
-                    l for l in output.split("\n") if "Average complexity:" in l
+                    line for line in output.split("\n") if "Average complexity:" in line
                 ][0]
                 avg_value = float(avg_line.split("(")[1].split(")")[0])
 
