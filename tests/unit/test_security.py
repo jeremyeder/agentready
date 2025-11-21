@@ -77,15 +77,25 @@ class TestXSSPrevention:
 
         # Verify XSS payloads are escaped in JavaScript context
         # The JSON.parse() line should have Unicode escapes
-        assert "\\u003cscript\\u003e" in html_content or "\u003cscript\u003e" in html_content
+        assert (
+            "\\u003cscript\\u003e" in html_content
+            or "\u003cscript\u003e" in html_content
+        )
 
         # Verify HTML contexts are escaped (title, body text)
         # Jinja2 autoescape should convert < to &lt; in HTML context
-        title_section = html_content[html_content.find("<title>"):html_content.find("</title>")]
-        assert "&lt;script&gt;" in title_section or "<script>alert('xss')</script>" not in title_section
+        title_section = html_content[
+            html_content.find("<title>") : html_content.find("</title>")
+        ]
+        assert (
+            "&lt;script&gt;" in title_section
+            or "<script>alert('xss')</script>" not in title_section
+        )
 
         # Most importantly: verify JavaScript execution context is safe
-        script_section = html_content[html_content.find("<script>"):html_content.find("</script>")]
+        script_section = html_content[
+            html_content.find("<script>") : html_content.find("</script>")
+        ]
         # JSON.parse() should have Unicode-escaped the malicious content
         assert "JSON.parse(" in script_section
         assert "\\u003c" in script_section  # Unicode escape for '<'
@@ -147,7 +157,9 @@ class TestXSSPrevention:
         html_content = result.read_text()
 
         # Verify JavaScript context is safe (JSON.parse with Unicode escapes)
-        script_section = html_content[html_content.find("<script>"):html_content.find("</script>")]
+        script_section = html_content[
+            html_content.find("<script>") : html_content.find("</script>")
+        ]
         assert "JSON.parse(" in script_section
         assert "\\u003c" in script_section  # '<' should be Unicode-escaped
 
@@ -155,4 +167,7 @@ class TestXSSPrevention:
         # The malicious payloads should be escaped
         assert "<img src=x onerror=alert(1)>" not in html_content
         # Script tags in data should be escaped
-        assert "\\u003cscript\\u003e" in html_content or "\u003cscript\u003e" in html_content
+        assert (
+            "\\u003cscript\\u003e" in html_content
+            or "\u003cscript\u003e" in html_content
+        )

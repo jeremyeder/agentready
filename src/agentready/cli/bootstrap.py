@@ -71,7 +71,9 @@ def bootstrap(repository, dry_run, language):
         click.echo("\n✅ Repository bootstrapped successfully!")
         click.echo("\nNext steps:")
         click.echo("  1. Review generated files")
-        click.echo("  2. Commit changes: git add . && git commit -m 'chore: Bootstrap repository infrastructure'")
+        click.echo(
+            "  2. Commit changes: git add . && git commit -m 'chore: Bootstrap repository infrastructure'"
+        )
         click.echo("  3. Push to GitHub: git push")
         click.echo("  4. Set up branch protection rules")
         click.echo("  5. Enable GitHub Actions")

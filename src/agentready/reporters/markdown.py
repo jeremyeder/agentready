@@ -64,7 +64,11 @@ class MarkdownReporter(BaseReporter):
     def _generate_header(self, assessment: Assessment) -> str:
         """Generate report header with repository info."""
         # Get git remote URL if available, otherwise use repo name
-        repo_display = assessment.repository.url if assessment.repository.url else assessment.repository.name
+        repo_display = (
+            assessment.repository.url
+            if assessment.repository.url
+            else assessment.repository.name
+        )
 
         return f"""# 🤖 AgentReady Assessment Report
 
