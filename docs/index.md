@@ -10,8 +10,8 @@ title: Home
 <div class="hero">
   <p class="hero-tagline">One command to agent-ready infrastructure. Transform your repository with automated GitHub setup, pre-commit hooks, CI/CD workflows, and continuous quality tracking.</p>
   <div class="hero-buttons">
-    <a href="/user-guide#bootstrap-your-repository" class="button button-primary">Bootstrap Your Repo</a>
-    <a href="/user-guide#running-assessments" class="button button-secondary">Run Assessment</a>
+    <a href="user-guide.html#bootstrap-your-repository" class="button button-primary">Bootstrap Your Repo</a>
+    <a href="user-guide.html#running-assessments" class="button button-secondary">Run Assessment</a>
   </div>
 </div>
 
@@ -112,7 +112,7 @@ open .agentready/report-latest.html
 - Specific remediation steps with tools and examples
 - Three report formats (HTML, Markdown, JSON)
 
-[Read the complete user guide →](/user-guide)
+[Read the complete user guide →](user-guide.html)
 
 ## Certification Levels
 
@@ -146,7 +146,7 @@ AgentReady scores repositories on a 0-100 scale with tier-weighted attributes:
   </div>
 </div>
 
-**AgentReady itself scores 75.4/100 (Gold)** — see our [self-assessment report](/examples/self-assessment).
+**AgentReady itself scores 75.4/100 (Gold)** — see our [self-assessment report](examples.html#agentready-self-assessment).
 
 ## What Gets Assessed?
 
@@ -184,7 +184,7 @@ Refinement and optimization:
 - **PR/Issue Templates** — Consistent contribution workflow
 - **Container Setup** — Portable development environments
 
-[View complete attribute reference →](/attributes)
+[View complete attribute reference →](attributes.html)
 
 ## Report Formats
 
@@ -209,7 +209,7 @@ AgentReady generates three complementary report formats:
 - Structured findings with evidence
 - **Use case**: CI/CD integration, programmatic analysis
 
-[See example reports →](/examples)
+[See example reports →](examples.html)
 
 ## Evidence-Based Research
 
@@ -223,7 +223,7 @@ All 25 attributes are derived from authoritative sources:
 
 Every attribute includes specific citations and measurable criteria. No subjective opinions—just proven practices that improve AI effectiveness.
 
-[Read the research document →](https://github.com/yourusername/agentready/blob/main/agent-ready-codebase-attributes.md)
+[Read the research document →](https://github.com/ambient-code/agentready/blob/main/agent-ready-codebase-attributes.md)
 
 ## Use Cases
 
@@ -264,7 +264,7 @@ Every attribute includes specific citations and measurable criteria. No subjecti
   <pre><code>pip install agentready
 agentready assess .
 </code></pre>
-  <a href="/user-guide" class="button button-primary button-large">Read the User Guide</a>
+  <a href="user-guide.html" class="button button-primary button-large">Read the User Guide</a>
 </div>
 
 ---
@@ -320,7 +320,7 @@ AgentReady Bootstrap creates production-ready infrastructure tailored to your la
 
 **`CODE_OF_CONDUCT.md`** — Red Hat standard code of conduct (if missing)
 
-[See generated file examples →](/examples#bootstrap-examples)
+[See generated file examples →](examples.html#bootstrap-examples)
 
 ## Latest News
 
@@ -330,15 +330,15 @@ Major release introducing automated infrastructure generation! Bootstrap command
 **Version 1.0.0 Released** (2025-11-21)
 Initial release with 10 implemented assessors, interactive HTML reports, and comprehensive documentation. AgentReady achieves Gold certification (75.4/100) on its own codebase.
 
-[View full changelog →](https://github.com/yourusername/agentready/releases)
+[View full changelog →](https://github.com/ambient-code/agentready/releases)
 
 ## Community
 
-- **GitHub**: [github.com/yourusername/agentready](https://github.com/yourusername/agentready)
+- **GitHub**: [github.com/ambient-code/agentready](https://github.com/ambient-code/agentready)
 - **Issues**: Report bugs or request features
 - **Discussions**: Ask questions and share experiences
-- **Contributing**: See the [Developer Guide](/developer-guide)
+- **Contributing**: See the [Developer Guide](developer-guide.html)
 
 ## License
 
-AgentReady is open source under the [MIT License](https://github.com/yourusername/agentready/blob/main/LICENSE).
+AgentReady is open source under the [MIT License](https://github.com/ambient-code/agentready/blob/main/LICENSE).

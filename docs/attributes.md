@@ -11,7 +11,7 @@ Complete reference for all 25 agent-ready attributes assessed by AgentReady.
   <h3 style="margin-top: 0;">🤖 Bootstrap Automation</h3>
   <p><strong>AgentReady Bootstrap automatically implements many of these attributes.</strong> Look for the <strong>✅ Bootstrap Addresses This</strong> marker to see which infrastructure Bootstrap generates for you.</p>
   <p>Instead of manually implementing each attribute, run <code>agentready bootstrap .</code> to generate complete GitHub setup in seconds.</p>
-  <p><a href="/user-guide#bootstrap-your-repository">Learn about Bootstrap →</a></p>
+  <p><a href="user-guide.html#bootstrap-your-repository">Learn about Bootstrap →</a></p>
 </div>
 
 ## Table of Contents
@@ -989,7 +989,7 @@ cr src/**/*.js
 **19. OpenAPI/Swagger Specs** (`api_documentation`) — Machine-readable API docs
 **20. DRY Principle** (`dry_principle`) — <5% duplicate code
 
-*Full details for each attribute available in the [research document](https://github.com/yourusername/agentready/blob/main/agent-ready-codebase-attributes.md).*
+*Full details for each attribute available in the [research document](https://github.com/ambient-code/agentready/blob/main/agent-ready-codebase-attributes.md).*
 
 ---
 
@@ -1005,7 +1005,7 @@ cr src/**/*.js
 **24. Secrets Management** (`secrets_management`) — No hardcoded secrets, use env vars
 **25. Performance Benchmarks** (`performance_benchmarks`) — Automated perf tests in CI
 
-*Full details for each attribute available in the [research document](https://github.com/yourusername/agentready/blob/main/agent-ready-codebase-attributes.md).*
+*Full details for each attribute available in the [research document](https://github.com/ambient-code/agentready/blob/main/agent-ready-codebase-attributes.md).*
 
 ---
 
@@ -1027,11 +1027,11 @@ cr src/**/*.js
 
 ## Next Steps
 
-- **[User Guide](/user-guide)** — Learn how to run assessments
-- **[Developer Guide](/developer-guide)** — Implement new assessors
-- **[API Reference](/api-reference)** — Integrate AgentReady
-- **[Examples](/examples)** — View real assessment reports
+- **[User Guide](user-guide.html)** — Learn how to run assessments
+- **[Developer Guide](developer-guide.html)** — Implement new assessors
+- **[API Reference](api-reference.html)** — Integrate AgentReady
+- **[Examples](examples.html)** — View real assessment reports
 
 ---
 
-**Complete attribute research**: See [agent-ready-codebase-attributes.md](https://github.com/yourusername/agentready/blob/main/agent-ready-codebase-attributes.md) for full citations, examples, and detailed criteria.
+**Complete attribute research**: See [agent-ready-codebase-attributes.md](https://github.com/ambient-code/agentready/blob/main/agent-ready-codebase-attributes.md) for full citations, examples, and detailed criteria.

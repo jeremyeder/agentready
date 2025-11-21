@@ -708,11 +708,11 @@ print("Trend chart saved: agentready-trend.png")
 
 ## Next Steps
 
-- **[User Guide](/user-guide)** — Learn how to run assessments
-- **[Developer Guide](/developer-guide)** — Implement custom assessors
-- **[Attributes](/attributes)** — Complete attribute reference
-- **[API Reference](/api-reference)** — Integrate AgentReady programmatically
+- **[User Guide](user-guide.html)** — Learn how to run assessments
+- **[Developer Guide](developer-guide.html)** — Implement custom assessors
+- **[Attributes](attributes.html)** — Complete attribute reference
+- **[API Reference](api-reference.html)** — Integrate AgentReady programmatically
 
 ---
 
-**View full reports**: Check out [`examples/self-assessment/`](https://github.com/yourusername/agentready/tree/main/examples/self-assessment) in the repository for complete HTML, Markdown, and JSON reports.
+**View full reports**: Check out [`examples/self-assessment/`](https://github.com/ambient-code/agentready/tree/main/examples/self-assessment) in the repository for complete HTML, Markdown, and JSON reports.

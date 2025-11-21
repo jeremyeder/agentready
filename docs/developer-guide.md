@@ -37,7 +37,7 @@ git clone https://github.com/YOUR_USERNAME/agentready.git
 cd agentready
 
 # Add upstream remote
-git remote add upstream https://github.com/yourusername/agentready.git
+git remote add upstream https://github.com/ambient-code/agentready.git
 ```
 
 ### Install Development Dependencies
@@ -1435,12 +1435,12 @@ AgentReady follows **semantic versioning** (SemVer):
 
 ## Additional Resources
 
-- **[Attributes Reference](/attributes)** — Detailed attribute definitions
-- **[API Reference](/api-reference)** — Public API documentation
-- **[Examples](/examples)** — Real-world assessment reports
+- **[Attributes Reference](attributes.html)** — Detailed attribute definitions
+- **[API Reference](api-reference.html)** — Public API documentation
+- **[Examples](examples.html)** — Real-world assessment reports
 - **CLAUDE.md** — Project context for AI agents
 - **BACKLOG.md** — Planned features and enhancements
 
 ---
 
-**Ready to contribute?** Check out [good first issues](https://github.com/yourusername/agentready/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) on GitHub!
+**Ready to contribute?** Check out [good first issues](https://github.com/ambient-code/agentready/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) on GitHub!

@@ -50,7 +50,7 @@ agentready --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/agentready.git
+git clone https://github.com/ambient-code/agentready.git
 cd agentready
 
 # Create virtual environment
@@ -1425,7 +1425,7 @@ vim .github/CODEOWNERS
 
 If you encounter issues not covered here:
 
-1. **Check GitHub Issues**: [github.com/yourusername/agentready/issues](https://github.com/yourusername/agentready/issues)
+1. **Check GitHub Issues**: [github.com/ambient-code/agentready/issues](https://github.com/ambient-code/agentready/issues)
 2. **Search Discussions**: Someone may have encountered similar problems
 3. **Create New Issue**: Use the bug report template with:
    - AgentReady version (`agentready --version`)
@@ -1438,11 +1438,11 @@ If you encounter issues not covered here:
 
 ## Next Steps
 
-- **[Developer Guide](/developer-guide)** — Learn how to contribute and extend AgentReady
-- **[Attributes Reference](/attributes)** — Understand each of the 25 attributes
-- **[API Reference](/api-reference)** — Integrate AgentReady into your tools
-- **[Examples](/examples)** — See real-world assessment reports
+- **[Developer Guide](developer-guide.html)** — Learn how to contribute and extend AgentReady
+- **[Attributes Reference](attributes.html)** — Understand each of the 25 attributes
+- **[API Reference](api-reference.html)** — Integrate AgentReady into your tools
+- **[Examples](examples.html)** — See real-world assessment reports
 
 ---
 
-**Questions?** Join the discussion on [GitHub](https://github.com/yourusername/agentready/discussions).
+**Questions?** Join the discussion on [GitHub](https://github.com/ambient-code/agentready/discussions).

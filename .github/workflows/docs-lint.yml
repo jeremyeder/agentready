@@ -1,0 +1,48 @@
+name: Documentation Linting
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs-lint.yml'
+      - '.markdown-link-check.json'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs-lint.yml'
+      - '.markdown-link-check.json'
+  workflow_dispatch:
+
+jobs:
+  lint-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check links in documentation
+        run: |
+          find docs -name '*.md' -print0 | \
+            xargs -0 -n1 markdown-link-check \
+              --config .markdown-link-check.json
+
+      - name: Comment on PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ Broken links found in documentation. See workflow logs for details.'
+            })
