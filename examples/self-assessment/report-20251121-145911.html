@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgentReady Assessment - agentready</title>
     <style>
+        /* CSS Variables - Dark/Professional Color Scheme */
+        :root {
+            /* Base colors - mostly black, dark blue, purple, white */
+            --background: #0a0e27;           /* Almost black with blue tint */
+            --surface: #1a1f3a;              /* Dark blue surface */
+            --surface-elevated: #252b4a;     /* Slightly lighter surface */
+
+            /* Primary colors */
+            --primary: #8b5cf6;              /* Purple (accent) */
+            --primary-light: #a78bfa;        /* Light purple */
+            --primary-dark: #6d28d9;         /* Dark purple */
+
+            /* Text colors */
+            --text-primary: #f8fafc;         /* Almost white */
+            --text-secondary: #cbd5e1;       /* Light gray */
+            --text-muted: #94a3b8;           /* Muted gray */
+
+            /* Status colors */
+            --success: #10b981;              /* Green (pass) */
+            --warning: #f59e0b;              /* Amber (warning) */
+            --danger: #ef4444;               /* Red (fail) */
+            --neutral: #64748b;              /* Gray (skipped) */
+
+            /* UI elements */
+            --border: #334155;               /* Dark border */
+            --shadow: rgba(0, 0, 0, 0.5);   /* Deep shadows */
+        }
+
         /* Reset and Base Styles */
         * {
             margin: 0;
@@ -15,36 +43,37 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
+            color: var(--text-primary);
+            background: var(--background);
             padding: 20px;
+            font-size: 18px;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: var(--surface);
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px var(--shadow);
         }
 
         /* Header */
         header {
-            border-bottom: 3px solid #2563eb;
+            border-bottom: 3px solid var(--primary);
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
 
         h1 {
-            font-size: 2rem;
-            color: #1e293b;
+            font-size: 36px;
+            color: var(--text-primary);
             margin-bottom: 10px;
         }
 
         .subtitle {
-            color: #64748b;
-            font-size: 1rem;
+            color: var(--text-secondary);
+            font-size: 18px;
         }
 
         /* Summary Cards */
@@ -56,38 +85,43 @@
         }
 
         .summary-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            padding: 24px;
             border-radius: 8px;
             text-align: center;
+            border: 2px solid var(--border);
         }
 
         .summary-card.score {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: var(--primary);
+            border-color: var(--primary-light);
         }
 
         .summary-card.certification {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: var(--surface-elevated);
+            border-color: var(--primary);
         }
 
         .summary-card.assessed {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: var(--surface-elevated);
+            border-color: var(--success);
         }
 
         .summary-card.duration {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            background: var(--surface-elevated);
+            border-color: var(--border);
         }
 
         .summary-card h3 {
-            font-size: 0.9rem;
+            font-size: 18px;
             font-weight: 500;
             opacity: 0.9;
             margin-bottom: 10px;
         }
 
         .summary-card .value {
-            font-size: 2rem;
+            font-size: 56px;
             font-weight: 700;
         }
 
@@ -98,8 +132,9 @@
             gap: 15px;
             margin: 30px 0;
             padding: 20px;
-            background: #f8fafc;
+            background: var(--surface-elevated);
             border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
         .control-group {
@@ -110,16 +145,22 @@
 
         .control-group label {
             font-weight: 600;
-            color: #475569;
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 18px;
         }
 
         select, input[type="search"] {
-            padding: 8px 12px;
-            border: 1px solid #cbd5e1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 0.9rem;
-            background: white;
+            font-size: 17px;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        select:focus, input[type="search"]:focus {
+            outline: 2px solid var(--primary);
+            border-color: var(--primary);
         }
 
         input[type="search"] {
@@ -127,33 +168,35 @@
         }
 
         .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid #e2e8f0;
-            background: white;
+            padding: 10px 18px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 17px;
             transition: all 0.2s;
         }
 
         .filter-btn:hover {
-            border-color: #2563eb;
-            background: #eff6ff;
+            border-color: var(--primary);
+            background: var(--surface-elevated);
         }
 
         .filter-btn.active {
-            background: #2563eb;
-            color: white;
-            border-color: #2563eb;
+            background: var(--primary);
+            color: var(--text-primary);
+            border-color: var(--primary);
         }
 
         .badge {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 15px;
             font-weight: 600;
             margin-left: 5px;
+            background: var(--surface-elevated);
         }
 
         /* Certification Ladder */
@@ -162,39 +205,56 @@
             justify-content: space-between;
             margin: 30px 0;
             padding: 20px;
-            background: #f8fafc;
+            background: var(--surface-elevated);
             border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
         .cert-level {
             flex: 1;
             text-align: center;
-            padding: 15px 10px;
+            padding: 18px 12px;
             border-radius: 6px;
             margin: 0 5px;
             transition: all 0.3s;
+            border: 2px solid var(--border);
         }
 
-        .cert-level.platinum { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); }
-        .cert-level.gold { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-        .cert-level.silver { background: linear-gradient(135deg, #e5e7eb, #d1d5db); }
-        .cert-level.bronze { background: linear-gradient(135deg, #fed7aa, #fdba74); }
-        .cert-level.needs-improvement { background: linear-gradient(135deg, #fecaca, #fca5a5); }
+        .cert-level.platinum {
+            background: rgba(224, 231, 255, 0.1);
+            color: #c7d2fe;
+        }
+        .cert-level.gold {
+            background: rgba(254, 243, 199, 0.1);
+            color: #fde68a;
+        }
+        .cert-level.silver {
+            background: rgba(229, 231, 235, 0.1);
+            color: #d1d5db;
+        }
+        .cert-level.bronze {
+            background: rgba(254, 215, 170, 0.1);
+            color: #fdba74;
+        }
+        .cert-level.needs-improvement {
+            background: rgba(254, 202, 202, 0.1);
+            color: #fca5a5;
+        }
 
         .cert-level.active {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: 3px solid #2563eb;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px var(--shadow);
+            border: 3px solid var(--primary);
         }
 
         .cert-level h4 {
-            font-size: 0.9rem;
+            font-size: 18px;
             margin-bottom: 5px;
         }
 
         .cert-level .range {
-            font-size: 0.8rem;
-            opacity: 0.7;
+            font-size: 16px;
+            opacity: 0.8;
         }
 
         /* Findings */
@@ -203,20 +263,22 @@
         }
 
         .finding {
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 15px;
             overflow: hidden;
             transition: all 0.2s;
+            background: var(--surface-elevated);
         }
 
         .finding:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px var(--shadow);
+            border-color: var(--primary);
         }
 
         .finding-header {
-            padding: 15px 20px;
-            background: #f8fafc;
+            padding: 18px 24px;
+            background: var(--surface);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -224,7 +286,7 @@
         }
 
         .finding-header:hover {
-            background: #f1f5f9;
+            background: var(--surface-elevated);
         }
 
         .finding-title {
@@ -235,46 +297,64 @@
         }
 
         .status-icon {
-            font-size: 1.5rem;
+            font-size: 28px;
         }
 
         .finding-info h3 {
-            font-size: 1rem;
-            color: #1e293b;
-            margin-bottom: 3px;
+            font-size: 22px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
         }
 
         .finding-meta {
-            font-size: 0.85rem;
-            color: #64748b;
+            font-size: 17px;
+            color: var(--text-muted);
         }
 
         .tier-badge {
-            padding: 4px 12px;
+            padding: 5px 14px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 15px;
             font-weight: 600;
         }
 
-        .tier-1 { background: #fee2e2; color: #991b1b; }
-        .tier-2 { background: #fed7aa; color: #9a3412; }
-        .tier-3 { background: #fef3c7; color: #92400e; }
-        .tier-4 { background: #d1fae5; color: #065f46; }
+        .tier-1 {
+            background: rgba(254, 226, 226, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(254, 226, 226, 0.3);
+        }
+        .tier-2 {
+            background: rgba(254, 215, 170, 0.15);
+            color: #fdba74;
+            border: 1px solid rgba(254, 215, 170, 0.3);
+        }
+        .tier-3 {
+            background: rgba(254, 243, 199, 0.15);
+            color: #fde68a;
+            border: 1px solid rgba(254, 243, 199, 0.3);
+        }
+        .tier-4 {
+            background: rgba(209, 250, 229, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(209, 250, 229, 0.3);
+        }
 
         .score-display {
-            font-size: 1.5rem;
+            font-size: 30px;
             font-weight: 700;
-            min-width: 80px;
+            min-width: 90px;
             text-align: right;
         }
 
-        .score-pass { color: #059669; }
-        .score-fail { color: #dc2626; }
-        .score-skip { color: #6b7280; }
+        .score-pass { color: var(--success); }
+        .score-fail { color: var(--danger); }
+        .score-skip { color: var(--neutral); }
 
         .finding-body {
-            padding: 20px;
+            padding: 24px;
             display: none;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
         }
 
         .finding.expanded .finding-body {
@@ -282,15 +362,20 @@
         }
 
         .finding-section {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .finding-section h4 {
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 10px;
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+
+        .finding-section p {
+            font-size: 17px;
+            line-height: 1.7;
         }
 
         .evidence-list, .remediation-steps {
@@ -299,20 +384,22 @@
         }
 
         .evidence-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 17px;
         }
 
         .evidence-list li:before {
             content: "▸ ";
-            color: #2563eb;
+            color: var(--primary);
             font-weight: 700;
-            margin-right: 8px;
+            margin-right: 10px;
         }
 
         .remediation-steps li {
-            padding: 10px 0 10px 30px;
+            padding: 12px 0 12px 35px;
             position: relative;
+            font-size: 17px;
         }
 
         .remediation-steps li:before {
@@ -320,16 +407,16 @@
             counter-increment: step;
             position: absolute;
             left: 0;
-            top: 10px;
-            background: #2563eb;
-            color: white;
-            width: 20px;
-            height: 20px;
+            top: 12px;
+            background: var(--primary);
+            color: var(--text-primary);
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 14px;
             font-weight: 700;
         }
 
@@ -338,20 +425,22 @@
         }
 
         code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 3px;
+            background: var(--surface-elevated);
+            padding: 3px 8px;
+            border-radius: 4px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-size: 16px;
+            color: var(--primary-light);
         }
 
         pre {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 15px;
+            background: var(--background);
+            color: var(--text-secondary);
+            padding: 18px;
             border-radius: 6px;
             overflow-x: auto;
-            margin: 10px 0;
+            margin: 12px 0;
+            border: 1px solid var(--border);
         }
 
         pre code {
@@ -364,10 +453,20 @@
         footer {
             margin-top: 50px;
             padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--border);
             text-align: center;
-            color: #64748b;
-            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-size: 17px;
+        }
+
+        footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+            text-decoration: underline;
         }
 
         /* Responsive */
@@ -407,7 +506,7 @@
     <div class="container">
         <header>
             <h1>🤖 AgentReady Assessment Report</h1>
-            <p class="subtitle">agentready • November 21, 2025 at 03:58</p>
+            <p class="subtitle">agentready • November 21, 2025 at 14:59</p>
         </header>
 
         <!-- Summary Cards -->
@@ -426,7 +525,7 @@
             </div>
             <div class="summary-card duration">
                 <h3>Duration</h3>
-                <div class="value">0.2s</div>
+                <div class="value">2.1s</div>
             </div>
         </div>
 
@@ -517,7 +616,7 @@
                         <h4>Evidence</h4>
                         <ul class="evidence-list">
                             
-                            <li>CLAUDE.md found at /Users/jeder/repos/sk/agentready/CLAUDE.md</li>
+                            <li>CLAUDE.md found at /Users/jeder/repos/agentready/CLAUDE.md</li>
                             
                         </ul>
                     </div>
@@ -600,7 +699,7 @@
                             <div class="finding-meta">
                                 Code Quality •
                                 <span class="tier-badge tier-1">Tier 1</span>
-                                 • 96.5%
+                                 • 95.4%
                             </div>
                         </div>
                     </div>
@@ -617,9 +716,9 @@
                         <h4>Evidence</h4>
                         <ul class="evidence-list">
                             
-                            <li>Typed functions: 167/173</li>
+                            <li>Typed functions: 165/173</li>
                             
-                            <li>Coverage: 96.5%</li>
+                            <li>Coverage: 95.4%</li>
                             
                         </ul>
                     </div>
@@ -1687,7 +1786,7 @@
 
         <footer>
             <p>Generated by <strong>AgentReady v1.0.0</strong></p>
-            <p>Repository: /Users/jeder/repos/sk/agentready • Branch: main • Commit: f968aaeb</p>
+            <p>Repository: /Users/jeder/repos/agentready • Branch: 002-fix-critical-security-bugs • Commit: d7550655</p>
             <p style="margin-top: 10px; font-size: 0.85rem;">
                 🤖 Generated with <a href="https://claude.com/claude-code" style="color: #2563eb;">Claude Code</a>
             </p>
@@ -1696,7 +1795,7 @@
 
     <script>
         // Embedded assessment data (properly escaped to prevent XSS)
-        const ASSESSMENT = JSON.parse("{\"repository\": {\"path\": \"/Users/jeder/repos/sk/agentready\", \"name\": \"agentready\", \"url\": \"git@github.com:ambient-code/agentready.git\", \"branch\": \"main\", \"commit_hash\": \"f968aaeb4391bdd31cc815b69d0ce7d5c3d99bce\", \"languages\": {\"YAML\": 9, \"Markdown\": 72, \"Shell\": 5, \"JSON\": 3, \"Python\": 36}, \"total_files\": 150, \"total_lines\": 65059}, \"timestamp\": \"2025-11-21T03:58:45.449559\", \"overall_score\": 80.0, \"certification_level\": \"Gold\", \"attributes_assessed\": 10, \"attributes_skipped\": 15, \"attributes_total\": 25, \"findings\": [{\"attribute\": {\"id\": \"claude_md_file\", \"name\": \"CLAUDE.md Configuration Files\", \"category\": \"Context Window Optimization\", \"tier\": 1, \"description\": \"Project-specific configuration for Claude Code\", \"criteria\": \"CLAUDE.md file exists in repository root\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"present\", \"threshold\": \"present\", \"evidence\": [\"CLAUDE.md found at /Users/jeder/repos/sk/agentready/CLAUDE.md\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"readme_structure\", \"name\": \"README Structure\", \"category\": \"Documentation Standards\", \"tier\": 1, \"description\": \"Well-structured README with key sections\", \"criteria\": \"README.md with installation, usage, and development sections\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"3/3 sections\", \"threshold\": \"3/3 sections\", \"evidence\": [\"Found 3/3 essential sections\", \"Installation: \\u2713\", \"Usage: \\u2713\", \"Development: \\u2713\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"type_annotations\", \"name\": \"Type Annotations\", \"category\": \"Code Quality\", \"tier\": 1, \"description\": \"Type hints in function signatures\", \"criteria\": \"\u003e80% of functions have type annotations\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"96.5%\", \"threshold\": \"\\u226580%\", \"evidence\": [\"Typed functions: 167/173\", \"Coverage: 96.5%\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"standard_layout\", \"name\": \"Standard Project Layouts\", \"category\": \"Repository Structure\", \"tier\": 1, \"description\": \"Follows standard project structure for language\", \"criteria\": \"Standard directories (src/, tests/, docs/) present\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"2/2 directories\", \"threshold\": \"2/2 directories\", \"evidence\": [\"Found 2/2 standard directories\", \"src/: \\u2713\", \"tests/: \\u2713\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"lock_files\", \"name\": \"Lock Files for Reproducibility\", \"category\": \"Dependency Management\", \"tier\": 1, \"description\": \"Lock files present for dependency pinning\", \"criteria\": \"package-lock.json, yarn.lock, poetry.lock, or requirements.txt with versions\", \"default_weight\": 0.1}, \"status\": \"fail\", \"score\": 0.0, \"measured_value\": \"none\", \"threshold\": \"at least one lock file\", \"evidence\": [\"No lock files found\"], \"remediation\": {\"summary\": \"Add lock file for dependency reproducibility\", \"steps\": [\"Use npm install, poetry lock, or equivalent to generate lock file\"], \"tools\": [], \"commands\": [\"npm install  # generates package-lock.json\"], \"examples\": [], \"citations\": []}, \"error_message\": null}, {\"attribute\": {\"id\": \"test_coverage\", \"name\": \"Test Coverage Requirements\", \"category\": \"Testing \u0026 CI/CD\", \"tier\": 2, \"description\": \"Test coverage thresholds configured and enforced\", \"criteria\": \"\u003e80% code coverage\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"configured\", \"threshold\": \"configured with \u003e80% threshold\", \"evidence\": [\"Coverage configuration found\", \"pytest-cov dependency present\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"precommit_hooks\", \"name\": \"Pre-commit Hooks \u0026 CI/CD Linting\", \"category\": \"Testing \u0026 CI/CD\", \"tier\": 2, \"description\": \"Pre-commit hooks configured for linting and formatting\", \"criteria\": \".pre-commit-config.yaml exists\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"configured\", \"threshold\": \"configured\", \"evidence\": [\".pre-commit-config.yaml found\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"conventional_commits\", \"name\": \"Conventional Commit Messages\", \"category\": \"Git \u0026 Version Control\", \"tier\": 2, \"description\": \"Follows conventional commit format\", \"criteria\": \"\\u226580% of recent commits follow convention\", \"default_weight\": 0.03}, \"status\": \"fail\", \"score\": 0.0, \"measured_value\": \"not configured\", \"threshold\": \"configured\", \"evidence\": [\"No commitlint or husky configuration\"], \"remediation\": {\"summary\": \"Configure conventional commits with commitlint\", \"steps\": [\"Install commitlint\", \"Configure husky for commit-msg hook\"], \"tools\": [\"commitlint\", \"husky\"], \"commands\": [\"npm install --save-dev @commitlint/cli @commitlint/config-conventional husky\"], \"examples\": [], \"citations\": []}, \"error_message\": null}, {\"attribute\": {\"id\": \"gitignore_completeness\", \"name\": \".gitignore Completeness\", \"category\": \"Git \u0026 Version Control\", \"tier\": 2, \"description\": \"Comprehensive .gitignore file\", \"criteria\": \".gitignore exists and covers common patterns\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"580 bytes\", \"threshold\": \"\u003e50 bytes\", \"evidence\": [\".gitignore found (580 bytes)\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"cyclomatic_complexity\", \"name\": \"Cyclomatic Complexity Thresholds\", \"category\": \"Code Quality\", \"tier\": 3, \"description\": \"Cyclomatic complexity thresholds enforced\", \"criteria\": \"Average complexity \u003c10, no functions \u003e15\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"3.1\", \"threshold\": \"\u003c10.0\", \"evidence\": [\"Average cyclomatic complexity: 3.1\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"one_command_setup\", \"name\": \"One-Command Build/Setup\", \"category\": \"Build \u0026 Development\", \"tier\": 2, \"description\": \"Assessment for One-Command Build/Setup\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"One-Command Build/Setup assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"concise_documentation\", \"name\": \"Concise Structured Documentation\", \"category\": \"Context Window Optimization\", \"tier\": 2, \"description\": \"Assessment for Concise Structured Documentation\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Concise Structured Documentation assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"inline_documentation\", \"name\": \"Inline Documentation\", \"category\": \"Documentation Standards\", \"tier\": 2, \"description\": \"Assessment for Inline Documentation\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Inline Documentation assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"file_size_limits\", \"name\": \"File Size Limits\", \"category\": \"Context Window Optimization\", \"tier\": 2, \"description\": \"Assessment for File Size Limits\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"File Size Limits assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"dependency_freshness\", \"name\": \"Dependency Freshness \u0026 Security\", \"category\": \"Dependency Management\", \"tier\": 2, \"description\": \"Assessment for Dependency Freshness \u0026 Security\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Dependency Freshness \u0026 Security assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"separation_concerns\", \"name\": \"Separation of Concerns\", \"category\": \"Repository Structure\", \"tier\": 2, \"description\": \"Assessment for Separation of Concerns\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Separation of Concerns assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"structured_logging\", \"name\": \"Structured Logging\", \"category\": \"Error Handling\", \"tier\": 3, \"description\": \"Assessment for Structured Logging\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Structured Logging assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"openapi_specs\", \"name\": \"OpenAPI/Swagger Specifications\", \"category\": \"API Documentation\", \"tier\": 3, \"description\": \"Assessment for OpenAPI/Swagger Specifications\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"OpenAPI/Swagger Specifications assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"architecture_decisions\", \"name\": \"Architecture Decision Records\", \"category\": \"Documentation Standards\", \"tier\": 3, \"description\": \"Assessment for Architecture Decision Records\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Architecture Decision Records assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"semantic_naming\", \"name\": \"Semantic File \u0026 Directory Naming\", \"category\": \"Modularity\", \"tier\": 3, \"description\": \"Assessment for Semantic File \u0026 Directory Naming\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Semantic File \u0026 Directory Naming assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"security_scanning\", \"name\": \"Security Scanning Automation\", \"category\": \"Security\", \"tier\": 4, \"description\": \"Assessment for Security Scanning Automation\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Security Scanning Automation assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"performance_benchmarks\", \"name\": \"Performance Benchmarks\", \"category\": \"Performance\", \"tier\": 4, \"description\": \"Assessment for Performance Benchmarks\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Performance Benchmarks assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"code_smells\", \"name\": \"Code Smell Elimination\", \"category\": \"Code Quality\", \"tier\": 4, \"description\": \"Assessment for Code Smell Elimination\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Code Smell Elimination assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"issue_pr_templates\", \"name\": \"Issue \u0026 Pull Request Templates\", \"category\": \"Git \u0026 Version Control\", \"tier\": 4, \"description\": \"Assessment for Issue \u0026 Pull Request Templates\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Issue \u0026 Pull Request Templates assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"container_setup\", \"name\": \"Container/Virtualization Setup\", \"category\": \"Build \u0026 Development\", \"tier\": 4, \"description\": \"Assessment for Container/Virtualization Setup\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Container/Virtualization Setup assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}], \"config\": null, \"duration_seconds\": 0.2}");
+        const ASSESSMENT = JSON.parse("{\"repository\": {\"path\": \"/Users/jeder/repos/agentready\", \"name\": \"agentready\", \"url\": \"git@github.com:ambient-code/agentready.git\", \"branch\": \"002-fix-critical-security-bugs\", \"commit_hash\": \"d755065592256da1a12a72524431440f7d297bf9\", \"languages\": {\"YAML\": 12, \"Markdown\": 79, \"JSON\": 7, \"Shell\": 5, \"Python\": 36}, \"total_files\": 167, \"total_lines\": 64441}, \"timestamp\": \"2025-11-21T14:59:11.101930\", \"overall_score\": 80.0, \"certification_level\": \"Gold\", \"attributes_assessed\": 10, \"attributes_skipped\": 15, \"attributes_total\": 25, \"findings\": [{\"attribute\": {\"id\": \"claude_md_file\", \"name\": \"CLAUDE.md Configuration Files\", \"category\": \"Context Window Optimization\", \"tier\": 1, \"description\": \"Project-specific configuration for Claude Code\", \"criteria\": \"CLAUDE.md file exists in repository root\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"present\", \"threshold\": \"present\", \"evidence\": [\"CLAUDE.md found at /Users/jeder/repos/agentready/CLAUDE.md\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"readme_structure\", \"name\": \"README Structure\", \"category\": \"Documentation Standards\", \"tier\": 1, \"description\": \"Well-structured README with key sections\", \"criteria\": \"README.md with installation, usage, and development sections\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"3/3 sections\", \"threshold\": \"3/3 sections\", \"evidence\": [\"Found 3/3 essential sections\", \"Installation: \\u2713\", \"Usage: \\u2713\", \"Development: \\u2713\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"type_annotations\", \"name\": \"Type Annotations\", \"category\": \"Code Quality\", \"tier\": 1, \"description\": \"Type hints in function signatures\", \"criteria\": \"\u003e80% of functions have type annotations\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"95.4%\", \"threshold\": \"\\u226580%\", \"evidence\": [\"Typed functions: 165/173\", \"Coverage: 95.4%\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"standard_layout\", \"name\": \"Standard Project Layouts\", \"category\": \"Repository Structure\", \"tier\": 1, \"description\": \"Follows standard project structure for language\", \"criteria\": \"Standard directories (src/, tests/, docs/) present\", \"default_weight\": 0.1}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"2/2 directories\", \"threshold\": \"2/2 directories\", \"evidence\": [\"Found 2/2 standard directories\", \"src/: \\u2713\", \"tests/: \\u2713\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"lock_files\", \"name\": \"Lock Files for Reproducibility\", \"category\": \"Dependency Management\", \"tier\": 1, \"description\": \"Lock files present for dependency pinning\", \"criteria\": \"package-lock.json, yarn.lock, poetry.lock, or requirements.txt with versions\", \"default_weight\": 0.1}, \"status\": \"fail\", \"score\": 0.0, \"measured_value\": \"none\", \"threshold\": \"at least one lock file\", \"evidence\": [\"No lock files found\"], \"remediation\": {\"summary\": \"Add lock file for dependency reproducibility\", \"steps\": [\"Use npm install, poetry lock, or equivalent to generate lock file\"], \"tools\": [], \"commands\": [\"npm install  # generates package-lock.json\"], \"examples\": [], \"citations\": []}, \"error_message\": null}, {\"attribute\": {\"id\": \"test_coverage\", \"name\": \"Test Coverage Requirements\", \"category\": \"Testing \u0026 CI/CD\", \"tier\": 2, \"description\": \"Test coverage thresholds configured and enforced\", \"criteria\": \"\u003e80% code coverage\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"configured\", \"threshold\": \"configured with \u003e80% threshold\", \"evidence\": [\"Coverage configuration found\", \"pytest-cov dependency present\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"precommit_hooks\", \"name\": \"Pre-commit Hooks \u0026 CI/CD Linting\", \"category\": \"Testing \u0026 CI/CD\", \"tier\": 2, \"description\": \"Pre-commit hooks configured for linting and formatting\", \"criteria\": \".pre-commit-config.yaml exists\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"configured\", \"threshold\": \"configured\", \"evidence\": [\".pre-commit-config.yaml found\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"conventional_commits\", \"name\": \"Conventional Commit Messages\", \"category\": \"Git \u0026 Version Control\", \"tier\": 2, \"description\": \"Follows conventional commit format\", \"criteria\": \"\\u226580% of recent commits follow convention\", \"default_weight\": 0.03}, \"status\": \"fail\", \"score\": 0.0, \"measured_value\": \"not configured\", \"threshold\": \"configured\", \"evidence\": [\"No commitlint or husky configuration\"], \"remediation\": {\"summary\": \"Configure conventional commits with commitlint\", \"steps\": [\"Install commitlint\", \"Configure husky for commit-msg hook\"], \"tools\": [\"commitlint\", \"husky\"], \"commands\": [\"npm install --save-dev @commitlint/cli @commitlint/config-conventional husky\"], \"examples\": [], \"citations\": []}, \"error_message\": null}, {\"attribute\": {\"id\": \"gitignore_completeness\", \"name\": \".gitignore Completeness\", \"category\": \"Git \u0026 Version Control\", \"tier\": 2, \"description\": \"Comprehensive .gitignore file\", \"criteria\": \".gitignore exists and covers common patterns\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"580 bytes\", \"threshold\": \"\u003e50 bytes\", \"evidence\": [\".gitignore found (580 bytes)\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"cyclomatic_complexity\", \"name\": \"Cyclomatic Complexity Thresholds\", \"category\": \"Code Quality\", \"tier\": 3, \"description\": \"Cyclomatic complexity thresholds enforced\", \"criteria\": \"Average complexity \u003c10, no functions \u003e15\", \"default_weight\": 0.03}, \"status\": \"pass\", \"score\": 100.0, \"measured_value\": \"3.1\", \"threshold\": \"\u003c10.0\", \"evidence\": [\"Average cyclomatic complexity: 3.1\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"one_command_setup\", \"name\": \"One-Command Build/Setup\", \"category\": \"Build \u0026 Development\", \"tier\": 2, \"description\": \"Assessment for One-Command Build/Setup\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"One-Command Build/Setup assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"concise_documentation\", \"name\": \"Concise Structured Documentation\", \"category\": \"Context Window Optimization\", \"tier\": 2, \"description\": \"Assessment for Concise Structured Documentation\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Concise Structured Documentation assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"inline_documentation\", \"name\": \"Inline Documentation\", \"category\": \"Documentation Standards\", \"tier\": 2, \"description\": \"Assessment for Inline Documentation\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Inline Documentation assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"file_size_limits\", \"name\": \"File Size Limits\", \"category\": \"Context Window Optimization\", \"tier\": 2, \"description\": \"Assessment for File Size Limits\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"File Size Limits assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"dependency_freshness\", \"name\": \"Dependency Freshness \u0026 Security\", \"category\": \"Dependency Management\", \"tier\": 2, \"description\": \"Assessment for Dependency Freshness \u0026 Security\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Dependency Freshness \u0026 Security assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"separation_concerns\", \"name\": \"Separation of Concerns\", \"category\": \"Repository Structure\", \"tier\": 2, \"description\": \"Assessment for Separation of Concerns\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Separation of Concerns assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"structured_logging\", \"name\": \"Structured Logging\", \"category\": \"Error Handling\", \"tier\": 3, \"description\": \"Assessment for Structured Logging\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Structured Logging assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"openapi_specs\", \"name\": \"OpenAPI/Swagger Specifications\", \"category\": \"API Documentation\", \"tier\": 3, \"description\": \"Assessment for OpenAPI/Swagger Specifications\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"OpenAPI/Swagger Specifications assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"architecture_decisions\", \"name\": \"Architecture Decision Records\", \"category\": \"Documentation Standards\", \"tier\": 3, \"description\": \"Assessment for Architecture Decision Records\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Architecture Decision Records assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"semantic_naming\", \"name\": \"Semantic File \u0026 Directory Naming\", \"category\": \"Modularity\", \"tier\": 3, \"description\": \"Assessment for Semantic File \u0026 Directory Naming\", \"criteria\": \"To be implemented\", \"default_weight\": 0.03}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Semantic File \u0026 Directory Naming assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"security_scanning\", \"name\": \"Security Scanning Automation\", \"category\": \"Security\", \"tier\": 4, \"description\": \"Assessment for Security Scanning Automation\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Security Scanning Automation assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"performance_benchmarks\", \"name\": \"Performance Benchmarks\", \"category\": \"Performance\", \"tier\": 4, \"description\": \"Assessment for Performance Benchmarks\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Performance Benchmarks assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"code_smells\", \"name\": \"Code Smell Elimination\", \"category\": \"Code Quality\", \"tier\": 4, \"description\": \"Assessment for Code Smell Elimination\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Code Smell Elimination assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"issue_pr_templates\", \"name\": \"Issue \u0026 Pull Request Templates\", \"category\": \"Git \u0026 Version Control\", \"tier\": 4, \"description\": \"Assessment for Issue \u0026 Pull Request Templates\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Issue \u0026 Pull Request Templates assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}, {\"attribute\": {\"id\": \"container_setup\", \"name\": \"Container/Virtualization Setup\", \"category\": \"Build \u0026 Development\", \"tier\": 4, \"description\": \"Assessment for Container/Virtualization Setup\", \"criteria\": \"To be implemented\", \"default_weight\": 0.01}, \"status\": \"not_applicable\", \"score\": null, \"measured_value\": null, \"threshold\": null, \"evidence\": [\"Container/Virtualization Setup assessment not yet implemented\"], \"remediation\": null, \"error_message\": null}], \"config\": null, \"duration_seconds\": 2.1}");
 
         // Toggle finding expansion
         function toggleFinding(header) {

@@ -1,21 +1,21 @@
 {
   "repository": {
-    "path": "/Users/jeder/repos/sk/agentready",
+    "path": "/Users/jeder/repos/agentready",
     "name": "agentready",
     "url": "git@github.com:ambient-code/agentready.git",
-    "branch": "main",
-    "commit_hash": "f968aaeb4391bdd31cc815b69d0ce7d5c3d99bce",
+    "branch": "002-fix-critical-security-bugs",
+    "commit_hash": "d755065592256da1a12a72524431440f7d297bf9",
     "languages": {
-      "YAML": 9,
-      "Markdown": 72,
+      "YAML": 12,
+      "Markdown": 79,
+      "JSON": 7,
       "Shell": 5,
-      "JSON": 3,
       "Python": 36
     },
-    "total_files": 150,
-    "total_lines": 65059
+    "total_files": 167,
+    "total_lines": 64441
   },
-  "timestamp": "2025-11-21T03:58:45.449559",
+  "timestamp": "2025-11-21T14:59:11.101930",
   "overall_score": 80.0,
   "certification_level": "Gold",
   "attributes_assessed": 10,
@@ -37,7 +37,7 @@
       "measured_value": "present",
       "threshold": "present",
       "evidence": [
-        "CLAUDE.md found at /Users/jeder/repos/sk/agentready/CLAUDE.md"
+        "CLAUDE.md found at /Users/jeder/repos/agentready/CLAUDE.md"
       ],
       "remediation": null,
       "error_message": null
@@ -77,11 +77,11 @@
       },
       "status": "pass",
       "score": 100.0,
-      "measured_value": "96.5%",
+      "measured_value": "95.4%",
       "threshold": "\u226580%",
       "evidence": [
-        "Typed functions: 167/173",
-        "Coverage: 96.5%"
+        "Typed functions: 165/173",
+        "Coverage: 95.4%"
       ],
       "remediation": null,
       "error_message": null
@@ -557,5 +557,5 @@
     }
   ],
   "config": null,
-  "duration_seconds": 0.2
+  "duration_seconds": 2.1
 }
