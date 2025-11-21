@@ -63,13 +63,14 @@ class MarkdownReporter(BaseReporter):
 
     def _generate_header(self, assessment: Assessment) -> str:
         """Generate report header with repository info."""
+        # Get git remote URL if available, otherwise use repo name
+        repo_display = assessment.repository.url if assessment.repository.url else assessment.repository.name
+
         return f"""# 🤖 AgentReady Assessment Report
 
-**Repository**: {assessment.repository.name}
-**Path**: `{assessment.repository.path}`
-**Branch**: {assessment.repository.branch}
-**Commit**: {assessment.repository.commit_hash[:8]}
-**Date**: {assessment.timestamp.strftime('%Y-%m-%d %H:%M:%S')}
+| Repository | Branch | Commit | Score | Level | Date |
+|------------|--------|--------|-------|-------|------|
+| **{repo_display}** | {assessment.repository.branch} | `{assessment.repository.commit_hash[:8]}` | **{assessment.overall_score:.1f}/100** | **{assessment.certification_level}** | {assessment.timestamp.strftime('%Y-%m-%d %H:%M')} |
 
 ---"""
 
