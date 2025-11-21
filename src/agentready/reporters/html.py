@@ -57,6 +57,7 @@ class HTMLReporter(BaseReporter):
             "findings": assessment.findings,
             "duration_seconds": assessment.duration_seconds,
             "config": assessment.config,
+            "metadata": assessment.metadata,
             # Embed assessment JSON for JavaScript
             "assessment_json": json.dumps(assessment.to_dict()),
         }
