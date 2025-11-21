@@ -1,0 +1,104 @@
+# AgentReady Documentation Site Configuration
+
+# Site settings
+title: AgentReady
+tagline: Repository Quality Assessment for AI-Assisted Development
+description: >-
+  Assess repositories against 25 evidence-based attributes that make codebases
+  more effective for AI-assisted development. Generate actionable reports with
+  specific remediation guidance.
+
+# Repository information
+repository: yourusername/agentready
+github_username: yourusername
+
+# Build settings
+theme: jekyll-theme-minimal
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    default_lang: python
+    css_class: 'highlight'
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: User Guide
+    url: /user-guide
+  - title: Developer Guide
+    url: /developer-guide
+  - title: Attributes
+    url: /attributes
+  - title: API Reference
+    url: /api-reference
+  - title: Examples
+    url: /examples
+
+# Collections
+collections:
+  attributes:
+    output: true
+    permalink: /attributes/:name
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "attributes"
+    values:
+      layout: "attribute"
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - README.md
+
+# Site metadata
+version: 1.0.0
+certification_levels:
+  platinum:
+    range: "90-100"
+    color: "#e5e4e2"
+    emoji: "🏆"
+  gold:
+    range: "75-89"
+    color: "#ffd700"
+    emoji: "🥇"
+  silver:
+    range: "60-74"
+    color: "#c0c0c0"
+    emoji: "🥈"
+  bronze:
+    range: "40-59"
+    color: "#cd7f32"
+    emoji: "🥉"
+  needs_improvement:
+    range: "0-39"
+    color: "#8b4513"
+    emoji: "📈"
+
+# URLs
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+
+# Analytics (optional - uncomment and add your ID)
+# google_analytics: UA-XXXXXXXXX-X

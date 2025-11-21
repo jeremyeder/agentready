@@ -45,7 +45,15 @@ package-dir = {"" = "src"}
 packages = ["agentready", "agentready.cli", "agentready.assessors", "agentready.models", "agentready.services", "agentready.reporters"]
 
 [tool.setuptools.package-data]
-agentready = ["data/*.md", "data/*.yaml", "templates/*.j2"]
+agentready = [
+    "data/*.md",
+    "data/*.yaml",
+    "templates/*.j2",
+    "templates/**/*.j2",
+    "templates/**/*.yml.j2",
+    "templates/**/*.yaml.j2",
+    "templates/**/*.md.j2"
+]
 
 [tool.black]
 line-length = 88
