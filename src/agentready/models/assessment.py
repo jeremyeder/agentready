@@ -6,6 +6,7 @@ from datetime import datetime
 from .config import Config
 from .discovered_skill import DiscoveredSkill
 from .finding import Finding
+from .metadata import AssessmentMetadata
 from .repository import Repository
 
 
@@ -25,6 +26,7 @@ class Assessment:
         config: Custom configuration used (if any)
         duration_seconds: Time taken for assessment
         discovered_skills: Patterns extracted from this assessment (optional)
+        metadata: Execution context (version, user, command, timestamp)
     """
 
     repository: Repository
@@ -38,6 +40,7 @@ class Assessment:
     config: Config | None
     duration_seconds: float
     discovered_skills: list[DiscoveredSkill] = field(default_factory=list)
+    metadata: AssessmentMetadata | None = None
 
     VALID_LEVELS = {"Platinum", "Gold", "Silver", "Bronze", "Needs Improvement"}
 
@@ -70,6 +73,7 @@ class Assessment:
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
+            "metadata": self.metadata.to_dict() if self.metadata else None,
             "repository": self.repository.to_dict(),
             "timestamp": self.timestamp.isoformat(),
             "overall_score": self.overall_score,

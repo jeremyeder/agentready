@@ -39,12 +39,49 @@
         h1 {
             font-size: 2rem;
             color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .report-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .repo-info h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            font-weight: 700;
             margin-bottom: 10px;
         }
 
-        .subtitle {
+        .repo-info .info-line {
+            color: #475569;
+            font-size: 0.95rem;
+            margin: 6px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .repo-info .info-line code {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #1e293b;
+        }
+
+        .meta-info {
+            text-align: right;
             color: #64748b;
-            font-size: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .meta-info .info-line {
+            margin: 6px 0;
+        }
+
+        .meta-info strong {
+            color: #475569;
         }
 
         /* Summary Cards */
@@ -407,7 +444,20 @@
     <div class="container">
         <header>
             <h1>🤖 AgentReady Assessment Report</h1>
-            <p class="subtitle">{{ repository.name }} • {{ timestamp.strftime('%B %d, %Y at %H:%M') }}</p>
+            <div class="report-header">
+                <div class="repo-info">
+                    <h2>{{ repository.name }}</h2>
+                    <div class="info-line">📁 {{ repository.path }}</div>
+                    <div class="info-line">🌿 <code>{{ repository.branch }}</code> @ <code>{{ repository.commit_hash[:8] }}</code></div>
+                </div>
+                {% if metadata %}
+                <div class="meta-info">
+                    <div class="info-line"><strong>Assessed:</strong> {{ metadata.assessment_timestamp_human }}</div>
+                    <div class="info-line"><strong>AgentReady:</strong> v{{ metadata.agentready_version }}</div>
+                    <div class="info-line"><strong>Run by:</strong> {{ metadata.executed_by }}</div>
+                </div>
+                {% endif %}
+            </div>
         </header>
 
         <!-- Summary Cards -->

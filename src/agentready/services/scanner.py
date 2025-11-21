@@ -1,5 +1,6 @@
 """Scanner service orchestrating the assessment workflow."""
 
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +10,7 @@ import git
 from ..models.assessment import Assessment
 from ..models.config import Config
 from ..models.finding import Finding
+from ..models.metadata import AssessmentMetadata
 from ..models.repository import Repository
 from .language_detector import LanguageDetector
 from .scorer import Scorer
@@ -63,12 +65,20 @@ class Scanner:
         if not (self.repository_path / ".git").exists():
             raise ValueError(f"Not a git repository: {self.repository_path}")
 
-    def scan(self, assessors: list, verbose: bool = False) -> Assessment:
+    def scan(
+        self,
+        assessors: list,
+        verbose: bool = False,
+        version: str = "unknown",
+        command: str | None = None,
+    ) -> Assessment:
         """Execute full assessment workflow.
 
         Args:
             assessors: List of assessor instances to run
             verbose: Enable detailed progress logging
+            version: AgentReady version string
+            command: CLI command executed (reconstructed from sys.argv if None)
 
         Returns:
             Complete Assessment with findings and scores
@@ -81,6 +91,7 @@ class Scanner:
         5. Return Assessment
         """
         start_time = time.time()
+        timestamp = datetime.now()
 
         if verbose:
             print(f"Scanning repository: {self.repository_path.name}")
@@ -107,6 +118,15 @@ class Scanner:
 
         duration = time.time() - start_time
 
+        # Create metadata
+        if command is None:
+            # Reconstruct command from sys.argv
+            command = " ".join(sys.argv)
+
+        metadata = AssessmentMetadata.create(
+            version=version, timestamp=timestamp, command=command
+        )
+
         if verbose:
             print(f"\nAssessment complete in {duration:.1f}s")
             print(f"Overall Score: {overall_score}/100 ({certification_level})")
@@ -116,7 +136,7 @@ class Scanner:
 
         return Assessment(
             repository=repository,
-            timestamp=datetime.now(),
+            timestamp=timestamp,
             overall_score=overall_score,
             certification_level=certification_level,
             attributes_assessed=assessed,
@@ -125,6 +145,7 @@ class Scanner:
             findings=findings,
             config=self.config,
             duration_seconds=round(duration, 1),
+            metadata=metadata,
         )
 
     def _build_repository_model(self, verbose: bool = False) -> Repository:
@@ -202,7 +223,7 @@ class Scanner:
                 )
         except Exception as e:
             if verbose:
-                print(f"error (applicability check failed)")
+                print("error (applicability check failed)")
             return Finding.error(
                 assessor.attribute, reason=f"Applicability check failed: {str(e)}"
             )

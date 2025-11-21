@@ -8,7 +8,8 @@ import pytest
 from agentready.models.assessment import Assessment
 from agentready.models.attribute import Attribute
 from agentready.models.config import Config
-from agentready.models.finding import Citation, Finding, Remediation
+from agentready.models.finding import Finding, Remediation
+from agentready.models.metadata import AssessmentMetadata
 from agentready.models.repository import Repository
 
 
@@ -311,3 +312,119 @@ class TestAssessment:
         assert Assessment.determine_certification_level(65.0) == "Silver"
         assert Assessment.determine_certification_level(45.0) == "Bronze"
         assert Assessment.determine_certification_level(20.0) == "Needs Improvement"
+
+
+class TestAssessmentMetadata:
+    """Test AssessmentMetadata model."""
+
+    def test_metadata_create(self):
+        """Test creating metadata from execution context."""
+        timestamp = datetime(2025, 11, 21, 2, 11, 5)
+        metadata = AssessmentMetadata.create(
+            version="1.0.0",
+            timestamp=timestamp,
+            command="agentready assess . --verbose",
+        )
+
+        assert metadata.agentready_version == "1.0.0"
+        assert metadata.command == "agentready assess . --verbose"
+        assert "2025" in metadata.assessment_timestamp  # ISO format
+        assert "November 21, 2025" in metadata.assessment_timestamp_human
+        assert "@" in metadata.executed_by  # Should have user@host format
+        assert len(metadata.working_directory) > 0
+
+    def test_metadata_to_dict(self):
+        """Test metadata serialization."""
+        timestamp = datetime(2025, 11, 21, 2, 11, 5)
+        metadata = AssessmentMetadata.create(
+            version="1.0.0", timestamp=timestamp, command="agentready assess ."
+        )
+
+        data = metadata.to_dict()
+        assert data["agentready_version"] == "1.0.0"
+        assert data["command"] == "agentready assess ."
+        assert "assessment_timestamp" in data
+        assert "assessment_timestamp_human" in data
+        assert "executed_by" in data
+        assert "working_directory" in data
+
+    def test_metadata_manual_creation(self):
+        """Test manually creating metadata with all fields."""
+        metadata = AssessmentMetadata(
+            agentready_version="1.2.3",
+            assessment_timestamp="2025-11-21T02:11:05",
+            assessment_timestamp_human="November 21, 2025 at 2:11 AM",
+            executed_by="testuser@testhost",
+            command="agentready assess /path/to/repo",
+            working_directory="/home/user",
+        )
+
+        assert metadata.agentready_version == "1.2.3"
+        assert metadata.executed_by == "testuser@testhost"
+        assert metadata.working_directory == "/home/user"
+
+    def test_assessment_with_metadata(self, tmp_path):
+        """Test that Assessment can include metadata."""
+        git_dir = tmp_path / ".git"
+        git_dir.mkdir()
+
+        repo = Repository(
+            path=tmp_path,
+            name="test",
+            url=None,
+            branch="main",
+            commit_hash="abc",
+            languages={},
+            total_files=10,
+            total_lines=100,
+        )
+
+        timestamp = datetime.now()
+        metadata = AssessmentMetadata.create(
+            version="1.0.0", timestamp=timestamp, command="agentready assess ."
+        )
+
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+        findings = [
+            Finding(
+                attribute=attr,
+                status="pass",
+                score=100.0,
+                measured_value="test",
+                threshold="test",
+                evidence=[],
+                remediation=None,
+                error_message=None,
+            )
+            for _ in range(25)
+        ]
+
+        assessment = Assessment(
+            repository=repo,
+            timestamp=timestamp,
+            overall_score=75.0,
+            certification_level="Gold",
+            attributes_assessed=25,
+            attributes_skipped=0,
+            attributes_total=25,
+            findings=findings,
+            config=None,
+            duration_seconds=1.5,
+            metadata=metadata,
+        )
+
+        assert assessment.metadata is not None
+        assert assessment.metadata.agentready_version == "1.0.0"
+
+        # Test serialization includes metadata
+        data = assessment.to_dict()
+        assert data["metadata"] is not None
+        assert data["metadata"]["agentready_version"] == "1.0.0"

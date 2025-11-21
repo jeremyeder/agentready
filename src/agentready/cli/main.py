@@ -6,6 +6,12 @@ from pathlib import Path
 
 import click
 
+try:
+    from importlib.metadata import version as get_version
+except ImportError:
+    # Python 3.7 compatibility
+    from importlib_metadata import version as get_version
+
 from ..assessors.code_quality import (
     CyclomaticComplexityAssessor,
     TypeAnnotationsAssessor,
@@ -29,6 +35,19 @@ from ..services.scanner import Scanner
 from .bootstrap import bootstrap
 from .demo import demo
 from .learn import learn
+from .repomix import repomix_generate
+
+
+def get_agentready_version() -> str:
+    """Get AgentReady version from package metadata.
+
+    Returns:
+        Version string (e.g., "1.0.0") or "unknown" if not installed
+    """
+    try:
+        return get_version("agentready")
+    except Exception:
+        return "unknown"
 
 
 def create_all_assessors():
@@ -152,7 +171,8 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
 
     # Run scan
     try:
-        assessment = scanner.scan(assessors, verbose=verbose)
+        version = get_agentready_version()
+        assessment = scanner.scan(assessors, verbose=verbose, version=version)
     except Exception as e:
         click.echo(f"Error during assessment: {str(e)}", err=True)
         if verbose:
@@ -286,11 +306,13 @@ def generate_config():
 cli.add_command(bootstrap)
 cli.add_command(demo)
 cli.add_command(learn)
+cli.add_command(repomix_generate)
 
 
 def show_version():
     """Show version information."""
-    click.echo("AgentReady Repository Scorer v1.0.0")
+    version = get_agentready_version()
+    click.echo(f"AgentReady Repository Scorer v{version}")
     click.echo("Research Report: bundled")
 
 

@@ -62,17 +62,32 @@ class MarkdownReporter(BaseReporter):
         return output_path
 
     def _generate_header(self, assessment: Assessment) -> str:
-        """Generate report header with repository info."""
-        # Get git remote URL if available, otherwise use repo name
-        repo_display = assessment.repository.url if assessment.repository.url else assessment.repository.name
+        """Generate report header with repository info and metadata."""
+        header = "# 🤖 AgentReady Assessment Report\n\n"
 
-        return f"""# 🤖 AgentReady Assessment Report
+        # Repository information
+        header += f"**Repository**: {assessment.repository.name}\n"
+        header += f"**Path**: `{assessment.repository.path}`\n"
+        header += f"**Branch**: `{assessment.repository.branch}` | **Commit**: `{assessment.repository.commit_hash[:8]}`\n"
 
-| Repository | Branch | Commit | Score | Level | Date |
-|------------|--------|--------|-------|-------|------|
-| **{repo_display}** | {assessment.repository.branch} | `{assessment.repository.commit_hash[:8]}` | **{assessment.overall_score:.1f}/100** | **{assessment.certification_level}** | {assessment.timestamp.strftime('%Y-%m-%d %H:%M')} |
+        # Assessment metadata (if available)
+        if assessment.metadata:
+            header += (
+                f"**Assessed**: {assessment.metadata.assessment_timestamp_human}\n"
+            )
+            header += (
+                f"**AgentReady Version**: {assessment.metadata.agentready_version}\n"
+            )
+            header += f"**Run by**: {assessment.metadata.executed_by}\n"
+        else:
+            # Fallback to timestamp if metadata not available
+            header += (
+                f"**Assessed**: {assessment.timestamp.strftime('%B %d, %Y at %H:%M')}\n"
+            )
 
----"""
+        header += "\n---"
+
+        return header
 
     def _generate_summary(self, assessment: Assessment) -> str:
         """Generate summary section with key metrics."""
