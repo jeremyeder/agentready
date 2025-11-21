@@ -25,7 +25,7 @@ jobs:
 
       - name: Install AgentReady
         run: |
-          pip install agentready
+          pip install -e .
 
       - name: Run AgentReady Assessment
         run: |
