@@ -230,7 +230,7 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
     click.echo(
         f"  Assessed: {assessment.attributes_assessed}/{assessment.attributes_total}"
     )
-    click.echo(f"  Skipped: {assessment.attributes_skipped}")
+    click.echo(f"  Skipped: {assessment.attributes_not_assessed}")
     click.echo(f"  Duration: {assessment.duration_seconds:.1f}s")
     click.echo("\nReports generated:")
     click.echo(f"  JSON: {json_file}")

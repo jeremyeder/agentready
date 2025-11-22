@@ -138,7 +138,9 @@ class LearningService:
             overall_score=assessment_data["overall_score"],
             certification_level=assessment_data["certification_level"],
             attributes_assessed=assessment_data["attributes_assessed"],
-            attributes_skipped=assessment_data["attributes_skipped"],
+            attributes_not_assessed=assessment_data.get(
+                "attributes_not_assessed", assessment_data.get("attributes_skipped", 0)
+            ),
             attributes_total=assessment_data["attributes_total"],
             findings=findings,
             config=None,  # Skip config for now
