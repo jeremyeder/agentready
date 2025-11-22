@@ -1,5 +1,6 @@
 """Code quality assessors for complexity, file length, type annotations, and code smells."""
 
+import ast
 import subprocess
 
 from ..models.attribute import Attribute
@@ -67,8 +68,8 @@ class TypeAnnotationsAssessor(BaseAssessor):
             )
 
     def _assess_python_types(self, repository: Repository) -> Finding:
-        """Assess Python type annotations using file inspection."""
-        # Simple heuristic: count functions with/without type hints
+        """Assess Python type annotations using AST parsing."""
+        # Use AST parsing to accurately detect type annotations
         try:
             result = subprocess.run(
                 ["git", "ls-files", "*.py"],
@@ -92,14 +93,29 @@ class TypeAnnotationsAssessor(BaseAssessor):
             full_path = repository.path / file_path
             try:
                 with open(full_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line.startswith("def ") and "(" in line:
-                            total_functions += 1
-                            # Check for type hints (-> in signature)
-                            if "->" in line or ":" in line.split("(")[1]:
-                                typed_functions += 1
-            except (OSError, UnicodeDecodeError):
+                    content = f.read()
+
+                # Parse the file with AST
+                tree = ast.parse(content, filename=str(file_path))
+
+                # Walk the AST and count functions with type annotations
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.FunctionDef):
+                        total_functions += 1
+                        # Check if function has type annotations
+                        # Return type annotation: node.returns is not None
+                        # Parameter annotations: any arg has annotation
+                        has_return_annotation = node.returns is not None
+                        has_param_annotations = any(
+                            arg.annotation is not None for arg in node.args.args
+                        )
+
+                        # Consider function typed if it has either return or param annotations
+                        if has_return_annotation or has_param_annotations:
+                            typed_functions += 1
+
+            except (OSError, UnicodeDecodeError, SyntaxError):
+                # Skip files that can't be read or parsed
                 continue
 
         if total_functions == 0:

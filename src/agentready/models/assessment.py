@@ -20,7 +20,7 @@ class Assessment:
         overall_score: Weighted average score 0-100
         certification_level: Platinum/Gold/Silver/Bronze based on score
         attributes_assessed: Number of successfully evaluated attributes
-        attributes_skipped: Number of skipped attributes (tool missing, errors)
+        attributes_not_assessed: Number of not assessed attributes (skipped, error, not_applicable)
         attributes_total: Total attributes (should be 25)
         findings: Individual attribute results
         config: Custom configuration used (if any)
@@ -34,7 +34,7 @@ class Assessment:
     overall_score: float
     certification_level: str
     attributes_assessed: int
-    attributes_skipped: int
+    attributes_not_assessed: int
     attributes_total: int
     findings: list[Finding]
     config: Config | None
@@ -57,10 +57,10 @@ class Assessment:
                 f"{self.certification_level}"
             )
 
-        if self.attributes_assessed + self.attributes_skipped != self.attributes_total:
+        if self.attributes_assessed + self.attributes_not_assessed != self.attributes_total:
             raise ValueError(
-                f"Assessed ({self.attributes_assessed}) + skipped "
-                f"({self.attributes_skipped}) must equal total "
+                f"Assessed ({self.attributes_assessed}) + not assessed "
+                f"({self.attributes_not_assessed}) must equal total "
                 f"({self.attributes_total})"
             )
 
@@ -79,7 +79,7 @@ class Assessment:
             "overall_score": self.overall_score,
             "certification_level": self.certification_level,
             "attributes_assessed": self.attributes_assessed,
-            "attributes_skipped": self.attributes_skipped,
+            "attributes_not_assessed": self.attributes_not_assessed,
             "attributes_total": self.attributes_total,
             "findings": [f.to_dict() for f in self.findings],
             "config": self.config.to_dict() if self.config else None,

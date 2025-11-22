@@ -140,7 +140,7 @@ class Scanner:
             overall_score=overall_score,
             certification_level=certification_level,
             attributes_assessed=assessed,
-            attributes_skipped=skipped,
+            attributes_not_assessed=skipped,
             attributes_total=len(findings),
             findings=findings,
             config=self.config,

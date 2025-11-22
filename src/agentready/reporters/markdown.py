@@ -98,7 +98,7 @@ class MarkdownReporter(BaseReporter):
 | **Overall Score** | **{assessment.overall_score:.1f}/100** |
 | **Certification Level** | **{assessment.certification_level}** |
 | **Attributes Assessed** | {assessment.attributes_assessed}/{assessment.attributes_total} |
-| **Attributes Skipped** | {assessment.attributes_skipped} |
+| **Attributes Not Assessed** | {assessment.attributes_not_assessed} |
 | **Assessment Duration** | {assessment.duration_seconds:.1f}s |
 
 ### Languages Detected

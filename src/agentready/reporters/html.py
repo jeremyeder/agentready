@@ -52,7 +52,7 @@ class HTMLReporter(BaseReporter):
             "overall_score": assessment.overall_score,
             "certification_level": assessment.certification_level,
             "attributes_assessed": assessment.attributes_assessed,
-            "attributes_skipped": assessment.attributes_skipped,
+            "attributes_not_assessed": assessment.attributes_not_assessed,
             "attributes_total": assessment.attributes_total,
             "findings": assessment.findings,
             "duration_seconds": assessment.duration_seconds,

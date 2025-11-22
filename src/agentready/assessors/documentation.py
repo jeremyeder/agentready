@@ -41,39 +41,37 @@ class CLAUDEmdAssessor(BaseAssessor):
         """
         claude_md_path = repository.path / "CLAUDE.md"
 
-        if claude_md_path.exists():
-            # Check file size (should have content)
-            try:
-                size = claude_md_path.stat().st_size
-                if size < 50:
-                    # File exists but is too small
-                    return Finding(
-                        attribute=self.attribute,
-                        status="fail",
-                        score=25.0,
-                        measured_value=f"{size} bytes",
-                        threshold=">50 bytes",
-                        evidence=[f"CLAUDE.md exists but is minimal ({size} bytes)"],
-                        remediation=self._create_remediation(),
-                        error_message=None,
-                    )
+        # Fix TOCTOU: Use try-except around file read instead of existence check
+        try:
+            with open(claude_md_path, "r", encoding="utf-8") as f:
+                content = f.read()
 
+            size = len(content)
+            if size < 50:
+                # File exists but is too small
                 return Finding(
                     attribute=self.attribute,
-                    status="pass",
-                    score=100.0,
-                    measured_value="present",
-                    threshold="present",
-                    evidence=[f"CLAUDE.md found at {claude_md_path}"],
-                    remediation=None,
+                    status="fail",
+                    score=25.0,
+                    measured_value=f"{size} bytes",
+                    threshold=">50 bytes",
+                    evidence=[f"CLAUDE.md exists but is minimal ({size} bytes)"],
+                    remediation=self._create_remediation(),
                     error_message=None,
                 )
 
-            except OSError:
-                return Finding.error(
-                    self.attribute, reason="Could not read CLAUDE.md file"
-                )
-        else:
+            return Finding(
+                attribute=self.attribute,
+                status="pass",
+                score=100.0,
+                measured_value="present",
+                threshold="present",
+                evidence=[f"CLAUDE.md found at {claude_md_path}"],
+                remediation=None,
+                error_message=None,
+            )
+
+        except FileNotFoundError:
             return Finding(
                 attribute=self.attribute,
                 status="fail",
@@ -83,6 +81,10 @@ class CLAUDEmdAssessor(BaseAssessor):
                 evidence=["CLAUDE.md not found in repository root"],
                 remediation=self._create_remediation(),
                 error_message=None,
+            )
+        except OSError as e:
+            return Finding.error(
+                self.attribute, reason=f"Could not read CLAUDE.md file: {e}"
             )
 
     def _create_remediation(self) -> Remediation:
@@ -171,19 +173,7 @@ class READMEAssessor(BaseAssessor):
         """
         readme_path = repository.path / "README.md"
 
-        if not readme_path.exists():
-            return Finding(
-                attribute=self.attribute,
-                status="fail",
-                score=0.0,
-                measured_value="missing",
-                threshold="present with sections",
-                evidence=["README.md not found"],
-                remediation=self._create_remediation(),
-                error_message=None,
-            )
-
-        # Read README and check for key sections
+        # Fix TOCTOU: Use try-except around file read instead of existence check
         try:
             with open(readme_path, "r", encoding="utf-8") as f:
                 content = f.read().lower()
@@ -231,6 +221,17 @@ class READMEAssessor(BaseAssessor):
                 error_message=None,
             )
 
+        except FileNotFoundError:
+            return Finding(
+                attribute=self.attribute,
+                status="fail",
+                score=0.0,
+                measured_value="missing",
+                threshold="present with sections",
+                evidence=["README.md not found"],
+                remediation=self._create_remediation(),
+                error_message=None,
+            )
         except OSError as e:
             return Finding.error(
                 self.attribute, reason=f"Could not read README.md: {str(e)}"
