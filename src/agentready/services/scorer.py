@@ -101,6 +101,22 @@ class Scorer:
 
         Per FR-027: Only include successfully evaluated attributes in score.
         Skipped/error attributes are excluded from denominator.
+
+        Edge Cases:
+            - If all attributes are skipped/error/not_applicable, returns 0.0
+              (total_weight = 0, no attributes successfully assessed)
+            - If findings list is empty, returns 0.0
+            - If an attribute has no score (score=None), it's excluded from calculation
+            - Scores are rounded to 1 decimal place for consistency
+
+        Semantic Note:
+            A score of 0.0 can mean either:
+            1. Repository scored 0 (assessed but failed all attributes), OR
+            2. Repository was not assessable (all attributes skipped)
+
+            To distinguish these cases, check assessment.attributes_assessed:
+            - attributes_assessed = 0 → not assessable
+            - attributes_assessed > 0 → actually scored 0
         """
         weights = self.merge_and_rescale_weights(config)
 

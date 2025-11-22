@@ -138,6 +138,42 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
     """Execute repository assessment."""
     repo_path = Path(repository_path).resolve()
 
+    # Security: Warn when scanning sensitive directories
+    sensitive_dirs = ["/etc", "/sys", "/proc", "/.ssh", "/var"]
+    if any(str(repo_path).startswith(p) for p in sensitive_dirs):
+        click.confirm(
+            f"⚠️  Warning: Scanning sensitive directory {repo_path}. Continue?",
+            abort=True,
+        )
+
+    # Performance: Warn for large repositories
+    try:
+        # Quick file count using git ls-files (if it's a git repo) or fallback
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            file_count = len(result.stdout.splitlines())
+        else:
+            # Not a git repo, use glob (slower but works)
+            file_count = sum(1 for _ in repo_path.rglob("*") if _.is_file())
+
+        if file_count > 10000:
+            click.confirm(
+                f"⚠️  Warning: Large repository detected ({file_count:,} files). "
+                "Assessment may take several minutes. Continue?",
+                abort=True,
+            )
+    except (subprocess.TimeoutExpired, Exception):
+        # If we can't count files quickly, just continue
+        pass
+
     if verbose:
         click.echo("AgentReady Repository Scorer")
         click.echo(f"{'=' * 50}\n")

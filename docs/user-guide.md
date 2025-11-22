@@ -823,6 +823,15 @@ The HTML report provides an interactive, visual interface:
 5. **Filter results**: Focus on specific attribute statuses
 6. **Copy remediation commands**: Use one-click copy for code examples
 
+#### Security
+
+HTML reports include Content Security Policy (CSP) headers for defense-in-depth:
+- Prevents unauthorized script execution
+- Mitigates XSS attack vectors
+- Safe to share and view in any browser
+
+The CSP policy allows only inline styles and scripts needed for interactivity.
+
 #### Sharing
 
 The HTML report is self-contained and can be:
@@ -1188,6 +1197,29 @@ AgentReady should complete in <10 seconds for most repositories. If it hangs:
    ```
 
 3. **Report issue** with repository size and language breakdown.
+
+**Note**: AgentReady will now warn you before scanning repositories with more than 10,000 files:
+```
+⚠️  Warning: Large repository detected (12,543 files).
+Assessment may take several minutes. Continue? [y/N]:
+```
+
+#### "Warning: Scanning sensitive directory"
+
+**Cause**: Attempting to scan system directories like `/etc`, `/sys`, `/proc`, `/.ssh`, or `/var`.
+
+**Solution**:
+AgentReady includes safety checks to prevent accidental scanning of sensitive system directories:
+
+```
+⚠️  Warning: Scanning sensitive directory /etc. Continue? [y/N]:
+```
+
+**Best practices**:
+- Only scan your own project repositories
+- Never scan system directories or sensitive configuration folders
+- If you need to assess a project in `/var/www`, copy it to a user directory first
+- Use `--output-dir` to avoid writing reports to sensitive locations
 
 #### "Invalid configuration file"
 

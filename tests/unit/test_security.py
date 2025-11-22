@@ -168,3 +168,135 @@ class TestXSSPrevention:
             "\\u003cscript\\u003e" in html_content
             or "\u003cscript\u003e" in html_content
         )
+
+
+class TestContentSecurityPolicy:
+    """Test Content Security Policy headers in HTML reports."""
+
+    def test_csp_header_present(self, tmp_path):
+        """Test that CSP meta tag is present in HTML reports."""
+        git_dir = tmp_path / ".git"
+        git_dir.mkdir()
+
+        repo = Repository(
+            path=tmp_path,
+            name="test-repo",
+            url=None,
+            branch="main",
+            commit_hash="abc123",
+            languages={"Python": 100},
+            total_files=10,
+            total_lines=100,
+        )
+
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=1.0,
+        )
+
+        finding = Finding(
+            attribute=attr,
+            status="pass",
+            score=100.0,
+            measured_value="test",
+            threshold="test",
+            evidence=[],
+            remediation=None,
+            error_message=None,
+        )
+
+        assessment = Assessment(
+            repository=repo,
+            timestamp=datetime.now(),
+            overall_score=100.0,
+            certification_level="Platinum",
+            attributes_assessed=1,
+            attributes_not_assessed=0,
+            attributes_total=1,
+            findings=[finding],
+            config=None,
+            duration_seconds=1.0,
+        )
+
+        # Generate HTML report
+        reporter = HTMLReporter()
+        output_file = tmp_path / "report.html"
+        result = reporter.generate(assessment, output_file)
+
+        # Read generated HTML
+        html_content = result.read_text()
+
+        # Verify CSP meta tag is present
+        assert 'http-equiv="Content-Security-Policy"' in html_content
+        assert "default-src 'self'" in html_content
+        assert "script-src 'unsafe-inline'" in html_content
+        assert "style-src 'unsafe-inline'" in html_content
+
+    def test_csp_header_in_head_section(self, tmp_path):
+        """Test that CSP meta tag is in the <head> section."""
+        git_dir = tmp_path / ".git"
+        git_dir.mkdir()
+
+        repo = Repository(
+            path=tmp_path,
+            name="test-repo",
+            url=None,
+            branch="main",
+            commit_hash="abc123",
+            languages={"Python": 100},
+            total_files=10,
+            total_lines=100,
+        )
+
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=1.0,
+        )
+
+        finding = Finding(
+            attribute=attr,
+            status="pass",
+            score=100.0,
+            measured_value="test",
+            threshold="test",
+            evidence=[],
+            remediation=None,
+            error_message=None,
+        )
+
+        assessment = Assessment(
+            repository=repo,
+            timestamp=datetime.now(),
+            overall_score=100.0,
+            certification_level="Platinum",
+            attributes_assessed=1,
+            attributes_not_assessed=0,
+            attributes_total=1,
+            findings=[finding],
+            config=None,
+            duration_seconds=1.0,
+        )
+
+        reporter = HTMLReporter()
+        output_file = tmp_path / "report.html"
+        result = reporter.generate(assessment, output_file)
+
+        html_content = result.read_text()
+
+        # Extract head section
+        head_start = html_content.find("<head>")
+        head_end = html_content.find("</head>")
+        head_section = html_content[head_start:head_end]
+
+        # Verify CSP is in head section
+        assert 'http-equiv="Content-Security-Policy"' in head_section
