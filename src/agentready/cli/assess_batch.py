@@ -1,0 +1,433 @@
+"""CLI command for batch repository assessment."""
+
+import json
+import sys
+from pathlib import Path
+from typing import Optional
+
+import click
+
+from ..models.config import Config
+from ..reporters.html import HTMLReporter
+from ..reporters.markdown import MarkdownReporter
+from ..services.batch_scanner import BatchScanner
+from ..utils.subprocess_utils import safe_subprocess_run
+
+
+def _get_agentready_version() -> str:
+    """Get AgentReady version from package metadata."""
+    try:
+        from importlib.metadata import version as get_version
+    except ImportError:
+        from importlib_metadata import version as get_version
+
+    try:
+        return get_version("agentready")
+    except Exception:
+        return "unknown"
+
+
+def _create_all_assessors():
+    """Create all 25 assessors for assessment."""
+    from ..assessors.code_quality import (
+        CyclomaticComplexityAssessor,
+        TypeAnnotationsAssessor,
+    )
+    from ..assessors.documentation import CLAUDEmdAssessor, READMEAssessor
+    from ..assessors.structure import StandardLayoutAssessor
+    from ..assessors.stub_assessors import (
+        ConventionalCommitsAssessor,
+        GitignoreAssessor,
+        LockFilesAssessor,
+        create_stub_assessors,
+    )
+    from ..assessors.testing import PreCommitHooksAssessor, TestCoverageAssessor
+
+    assessors = [
+        # Tier 1 Essential (5 assessors)
+        CLAUDEmdAssessor(),
+        READMEAssessor(),
+        TypeAnnotationsAssessor(),
+        StandardLayoutAssessor(),
+        LockFilesAssessor(),
+        # Tier 2 Critical (10 assessors - 3 implemented, 7 stubs)
+        TestCoverageAssessor(),
+        PreCommitHooksAssessor(),
+        ConventionalCommitsAssessor(),
+        GitignoreAssessor(),
+        CyclomaticComplexityAssessor(),
+    ]
+
+    # Add remaining stub assessors
+    assessors.extend(create_stub_assessors())
+
+    return assessors
+
+
+def _load_config(config_path: Path) -> Config:
+    """Load configuration from YAML file with validation."""
+    import yaml
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    # Validate data is a dict
+    if not isinstance(data, dict):
+        raise ValueError(
+            f"Config must be a YAML object/dict, got {type(data).__name__}"
+        )
+
+    # Validate expected keys and reject unknown keys
+    allowed_keys = {
+        "weights",
+        "excluded_attributes",
+        "language_overrides",
+        "output_dir",
+        "report_theme",
+        "custom_theme",
+    }
+    unknown_keys = set(data.keys()) - allowed_keys
+    if unknown_keys:
+        raise ValueError(f"Unknown config keys: {', '.join(sorted(unknown_keys))}")
+
+    # Validate weights
+    weights = data.get("weights", {})
+    if not isinstance(weights, dict):
+        raise ValueError(f"'weights' must be a dict, got {type(weights).__name__}")
+    for key, value in weights.items():
+        if not isinstance(key, str):
+            raise ValueError(f"Weight keys must be strings, got {type(key).__name__}")
+        if not isinstance(value, (int, float)):
+            raise ValueError(
+                f"Weight values must be numbers, got {type(value).__name__} for '{key}'"
+            )
+
+    # Validate excluded_attributes
+    excluded = data.get("excluded_attributes", [])
+    if not isinstance(excluded, list):
+        raise ValueError(
+            f"'excluded_attributes' must be a list, got {type(excluded).__name__}"
+        )
+    for item in excluded:
+        if not isinstance(item, str):
+            raise ValueError(
+                f"'excluded_attributes' items must be strings, got {type(item).__name__}"
+            )
+
+    # Validate language_overrides
+    lang_overrides = data.get("language_overrides", {})
+    if not isinstance(lang_overrides, dict):
+        raise ValueError(
+            f"'language_overrides' must be a dict, got {type(lang_overrides).__name__}"
+        )
+    for lang, patterns in lang_overrides.items():
+        if not isinstance(lang, str):
+            raise ValueError(
+                f"'language_overrides' keys must be strings, got {type(lang).__name__}"
+            )
+        if not isinstance(patterns, list):
+            raise ValueError(
+                f"'language_overrides' values must be lists, got {type(patterns).__name__}"
+            )
+        for pattern in patterns:
+            if not isinstance(pattern, str):
+                raise ValueError(
+                    f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
+                )
+
+    # Validate output_dir
+    output_dir = data.get("output_dir")
+    if output_dir is not None and not isinstance(output_dir, str):
+        raise ValueError(
+            f"'output_dir' must be string or null, got {type(output_dir).__name__}"
+        )
+
+    return Config(
+        weights=weights,
+        excluded_attributes=excluded,
+        language_overrides=lang_overrides,
+        output_dir=Path(output_dir) if output_dir else None,
+        report_theme=data.get("report_theme", "default"),
+        custom_theme=data.get("custom_theme"),
+    )
+
+
+@click.command()
+@click.option(
+    "--repos-file",
+    "-f",
+    type=click.Path(exists=True),
+    default=None,
+    help="File with repository URLs/paths (one per line)",
+)
+@click.option(
+    "--repos",
+    "-r",
+    multiple=True,
+    help="Repository URLs/paths (can be specified multiple times)",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Enable verbose output",
+)
+@click.option(
+    "--output-dir",
+    "-o",
+    type=click.Path(),
+    default=None,
+    help="Output directory for batch reports (default: .agentready/batch/)",
+)
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(exists=True),
+    default=None,
+    help="Path to configuration file",
+)
+@click.option(
+    "--use-cache",
+    is_flag=True,
+    default=True,
+    help="Use cached assessments when available (default: True)",
+)
+@click.option(
+    "--cache-dir",
+    type=click.Path(),
+    default=None,
+    help="Custom cache directory (default: .agentready/cache/)",
+)
+def assess_batch(
+    repos_file: Optional[str],
+    repos: tuple,
+    verbose: bool,
+    output_dir: Optional[str],
+    config: Optional[str],
+    use_cache: bool,
+    cache_dir: Optional[str],
+):
+    """Assess multiple repositories in a batch operation.
+
+    Supports two input methods:
+
+    1. File-based input:
+        agentready assess-batch --repos-file repos.txt
+
+    2. Inline arguments:
+        agentready assess-batch --repos https://github.com/user/repo1 --repos https://github.com/user/repo2
+
+    Output files are saved to .agentready/batch/ by default.
+    """
+    # Collect repository URLs
+    repository_urls = []
+
+    # Read from file if provided
+    if repos_file:
+        try:
+            with open(repos_file, encoding="utf-8") as f:
+                file_urls = [line.strip() for line in f if line.strip()]
+                repository_urls.extend(file_urls)
+        except IOError as e:
+            click.echo(f"Error reading repos file: {e}", err=True)
+            sys.exit(1)
+
+    # Add inline repositories
+    if repos:
+        repository_urls.extend(repos)
+
+    # Validate we have repositories
+    if not repository_urls:
+        click.echo("Error: No repositories specified. Use --repos-file or --repos", err=True)
+        sys.exit(1)
+
+    if verbose:
+        click.echo("AgentReady Batch Assessment")
+        click.echo(f"{'=' * 50}")
+        click.echo(f"Repositories: {len(repository_urls)}")
+        click.echo(f"Output: {output_dir or '.agentready/batch/'}\n")
+
+    # Load configuration if provided
+    config_obj = None
+    if config:
+        try:
+            config_obj = _load_config(Path(config))
+        except Exception as e:
+            click.echo(f"Error loading config: {e}", err=True)
+            sys.exit(1)
+
+    # Set output directory
+    if output_dir:
+        output_path = Path(output_dir)
+    else:
+        output_path = Path(".agentready/batch")
+
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Set cache directory
+    if cache_dir:
+        cache_path = Path(cache_dir)
+    else:
+        cache_path = Path(".agentready/cache")
+
+    # Create batch scanner
+    version = _get_agentready_version()
+    batch_scanner = BatchScanner(
+        cache_dir=cache_path,
+        version=version,
+        command="assess-batch",
+    )
+
+    # Create assessors
+    assessors = _create_all_assessors()
+
+    if verbose:
+        click.echo(f"Assessors: {len(assessors)}")
+        click.echo(f"Cache: {cache_path}")
+        click.echo()
+
+    # Progress callback
+    def show_progress(current: int, total: int):
+        click.echo(f"Assessing repository {current + 1}/{total}...")
+
+    # Run batch assessment
+    try:
+        batch_assessment = batch_scanner.scan_batch(
+            repository_urls=repository_urls,
+            assessors=assessors,
+            config=config_obj,
+            use_cache=use_cache,
+            verbose=verbose,
+            progress_callback=show_progress if verbose else None,
+        )
+    except Exception as e:
+        click.echo(f"Error during batch assessment: {e}", err=True)
+        if verbose:
+            import traceback
+
+            traceback.print_exc()
+        sys.exit(1)
+
+    # Generate timestamp for file naming
+    timestamp = batch_assessment.timestamp.strftime("%Y%m%d-%H%M%S")
+
+    # Save JSON output
+    json_file = output_path / f"batch-{timestamp}.json"
+    try:
+        with open(json_file, "w", encoding="utf-8") as f:
+            json.dump(batch_assessment.to_dict(), f, indent=2)
+        if verbose:
+            click.echo(f"Saved JSON: {json_file}")
+    except IOError as e:
+        click.echo(f"Error saving JSON: {e}", err=True)
+
+    # Generate HTML report (batch report)
+    try:
+        html_reporter = HTMLReporter()
+        html_file = output_path / f"batch-{timestamp}.html"
+        # TODO: Implement batch HTML reporter
+        if verbose:
+            click.echo(f"HTML report not yet implemented")
+    except Exception as e:
+        click.echo(f"Warning: HTML report generation failed: {e}")
+
+    # Generate Markdown report (summary)
+    try:
+        markdown_file = output_path / f"batch-{timestamp}.md"
+        _generate_batch_markdown_report(batch_assessment, markdown_file)
+        if verbose:
+            click.echo(f"Saved Markdown: {markdown_file}")
+    except Exception as e:
+        click.echo(f"Warning: Markdown report generation failed: {e}")
+
+    # Print summary
+    click.echo("\n" + "=" * 50)
+    click.echo("Batch Assessment Summary")
+    click.echo("=" * 50)
+    click.echo(f"Total repositories: {batch_assessment.summary.total_repositories}")
+    click.echo(f"Successful: {batch_assessment.summary.successful_assessments}")
+    click.echo(f"Failed: {batch_assessment.summary.failed_assessments}")
+    click.echo(f"Success rate: {batch_assessment.get_success_rate():.1f}%")
+    click.echo(f"Average score: {batch_assessment.summary.average_score:.1f}/100")
+    click.echo(f"Total duration: {batch_assessment.total_duration_seconds:.1f}s")
+    click.echo()
+
+    if batch_assessment.summary.score_distribution:
+        click.echo("Score Distribution:")
+        for level, count in batch_assessment.summary.score_distribution.items():
+            if count > 0:
+                click.echo(f"  {level}: {count}")
+        click.echo()
+
+    if batch_assessment.summary.top_failing_attributes:
+        click.echo("Top Failing Attributes:")
+        for item in batch_assessment.summary.top_failing_attributes[:5]:
+            click.echo(f"  {item['attribute_id']}: {item['failure_count']} failures")
+
+
+def _generate_batch_markdown_report(batch_assessment, output_file: Path) -> None:
+    """Generate Markdown report for batch assessment.
+
+    Args:
+        batch_assessment: BatchAssessment object
+        output_file: Path to write Markdown report
+    """
+    lines = [
+        "# Batch Assessment Report\n",
+        f"**Batch ID**: {batch_assessment.batch_id}\n",
+        f"**Timestamp**: {batch_assessment.timestamp.isoformat()}\n",
+        f"**AgentReady Version**: {batch_assessment.agentready_version}\n\n",
+        "## Summary\n",
+        f"- **Total Repositories**: {batch_assessment.summary.total_repositories}\n",
+        f"- **Successful Assessments**: {batch_assessment.summary.successful_assessments}\n",
+        f"- **Failed Assessments**: {batch_assessment.summary.failed_assessments}\n",
+        f"- **Success Rate**: {batch_assessment.get_success_rate():.1f}%\n",
+        f"- **Average Score**: {batch_assessment.summary.average_score:.1f}/100\n",
+        f"- **Total Duration**: {batch_assessment.total_duration_seconds:.1f}s\n\n",
+    ]
+
+    # Score distribution
+    if batch_assessment.summary.score_distribution:
+        lines.append("## Score Distribution\n")
+        for level, count in batch_assessment.summary.score_distribution.items():
+            if count > 0:
+                lines.append(f"- {level}: {count}\n")
+        lines.append("\n")
+
+    # Language breakdown
+    if batch_assessment.summary.language_breakdown:
+        lines.append("## Language Breakdown\n")
+        for lang, count in sorted(
+            batch_assessment.summary.language_breakdown.items(),
+            key=lambda x: x[1],
+            reverse=True,
+        ):
+            lines.append(f"- {lang}: {count}\n")
+        lines.append("\n")
+
+    # Top failing attributes
+    if batch_assessment.summary.top_failing_attributes:
+        lines.append("## Top Failing Attributes\n")
+        for item in batch_assessment.summary.top_failing_attributes:
+            lines.append(
+                f"- {item['attribute_id']}: {item['failure_count']} failures\n"
+            )
+        lines.append("\n")
+
+    # Results detail
+    lines.append("## Individual Results\n")
+    for result in batch_assessment.results:
+        lines.append(f"\n### {result.repository_url}\n")
+        if result.is_success():
+            lines.append(f"- **Score**: {result.assessment.overall_score}/100\n")
+            lines.append(f"- **Certification**: {result.assessment.certification_level}\n")
+            lines.append(f"- **Duration**: {result.duration_seconds:.1f}s\n")
+            lines.append(f"- **Cached**: {result.cached}\n")
+        else:
+            lines.append(f"- **Error**: {result.error_type}\n")
+            lines.append(f"- **Details**: {result.error}\n")
+            lines.append(f"- **Duration**: {result.duration_seconds:.1f}s\n")
+
+    # Write to file
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.writelines(lines)

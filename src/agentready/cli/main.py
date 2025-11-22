@@ -34,6 +34,7 @@ from ..services.research_loader import ResearchLoader
 from ..services.scanner import Scanner
 from ..utils.subprocess_utils import safe_subprocess_run
 from .align import align
+from .assess_batch import assess_batch
 from .bootstrap import bootstrap
 from .demo import demo
 from .learn import learn
@@ -455,6 +456,7 @@ def generate_config():
 
 # Register commands
 cli.add_command(align)
+cli.add_command(assess_batch)
 cli.add_command(bootstrap)
 cli.add_command(demo)
 cli.add_command(learn)

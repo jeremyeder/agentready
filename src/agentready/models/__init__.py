@@ -2,6 +2,12 @@
 
 from agentready.models.assessment import Assessment
 from agentready.models.attribute import Attribute
+from agentready.models.batch_assessment import (
+    BatchAssessment,
+    BatchSummary,
+    FailureTracker,
+    RepositoryResult,
+)
 from agentready.models.citation import Citation
 from agentready.models.config import Config
 from agentready.models.discovered_skill import DiscoveredSkill
@@ -21,16 +27,20 @@ __all__ = [
     "Assessment",
     "AssessmentMetadata",
     "Attribute",
+    "BatchAssessment",
+    "BatchSummary",
     "Citation",
     "CommandFix",
     "Config",
     "DiscoveredSkill",
+    "FailureTracker",
     "FileCreationFix",
     "FileModificationFix",
     "Finding",
     "Fix",
     "MultiStepFix",
     "Repository",
+    "RepositoryResult",
     "Theme",
     "validate_theme_contrast",
 ]
