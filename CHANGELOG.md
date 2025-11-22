@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/ambient-code/agentready/compare/v1.6.0...v1.6.1) (2025-11-22)
+
+
+### Bug Fixes
+
+* Update Claude workflow to trigger on [@claude](https://github.com/claude) mentions ([#35](https://github.com/ambient-code/agentready/issues/35)) ([a8a3fab](https://github.com/ambient-code/agentready/commit/a8a3fab5f2372feab568081afe712124163e416e))
+
 # [1.6.0](https://github.com/ambient-code/agentready/compare/v1.5.0...v1.6.0) (2025-11-22)
 
 
