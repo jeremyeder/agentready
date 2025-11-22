@@ -327,13 +327,14 @@ agentready/
 │   ├── unit/               # Unit tests
 │   └── integration/        # End-to-end tests
 ├── examples/               # Example reports
-│   └── self-assessment/    # AgentReady's own assessment
+│   ├── self-assessment/    # AgentReady's own assessment
+│   └── config/             # Example configuration files
 ├── specs/                  # Feature specifications
+├── reports/                # Generated reports
+│   └── repomix/           # Repomix analysis outputs
 ├── pyproject.toml          # Python package configuration
 ├── CLAUDE.md              # This file
-├── README.md              # User-facing documentation
-├── BACKLOG.md             # Future features and enhancements
-└── GITHUB_ISSUES.md       # GitHub-ready issue templates
+└── README.md              # User-facing documentation
 ```
 
 ---
@@ -427,13 +428,11 @@ chore: Update dependencies
 - Organization-wide dashboards
 - Historical trend analysis
 
-See `BACKLOG.md` for full feature list.
-
 ---
 
 ## Getting Help
 
-- **Issues**: Create GitHub issue using templates in `GITHUB_ISSUES.md`
+- **Issues**: Create GitHub issue for bugs or feature requests
 - **Documentation**: See `README.md` for user guide
 - **Examples**: View `examples/self-assessment/` for reference reports
 - **Research**: Read `agent-ready-codebase-attributes.md` for attribute definitions
@@ -443,11 +442,10 @@ See `BACKLOG.md` for full feature list.
 ## Related Documents
 
 - **.github/CLAUDE_INTEGRATION.md** - Dual Claude integration guide (automated + interactive)
-- **BACKLOG.md** - Future features and enhancements (11 items)
-- **GITHUB_ISSUES.md** - GitHub-ready issue templates
 - **README.md** - User-facing documentation
 - **specs/** - Feature specifications and design documents
 - **examples/self-assessment/** - AgentReady's own assessment (75.4/100 Gold)
+- **examples/config/** - Example configuration files
 
 ---
 

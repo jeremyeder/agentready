@@ -37,11 +37,8 @@ from .bootstrap import bootstrap
 from .demo import demo
 from .learn import learn
 from .repomix import repomix_generate
-<<<<<<< HEAD
 from .research import research
-=======
 from .schema import migrate_report, validate_report
->>>>>>> origin/main
 
 
 def get_agentready_version() -> str:
@@ -325,10 +322,12 @@ def research_version():
 @cli.command()
 def generate_config():
     """Generate example configuration file."""
-    example_path = Path(".agentready-config.example.yaml")
+    example_path = Path("examples/config/agentready-config.example.yaml")
 
     if not example_path.exists():
-        click.echo("Error: .agentready-config.example.yaml not found", err=True)
+        click.echo(
+            "Error: examples/config/agentready-config.example.yaml not found", err=True
+        )
         sys.exit(1)
 
     target = Path(".agentready-config.yaml")
@@ -351,11 +350,8 @@ cli.add_command(demo)
 cli.add_command(learn)
 cli.add_command(migrate_report)
 cli.add_command(repomix_generate)
-<<<<<<< HEAD
 cli.add_command(research)
-=======
 cli.add_command(validate_report)
->>>>>>> origin/main
 
 
 def show_version():

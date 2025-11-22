@@ -15,7 +15,7 @@ class RepomixService:
         "$schema": "https://repomix.com/schemas/latest/schema.json",
         "input": {"maxFileSize": 52428800},
         "output": {
-            "filePath": "repomix-output.md",
+            "filePath": "reports/repomix/repomix-output.md",
             "style": "markdown",
             "parsableStyle": False,
             "fileSummary": True,
@@ -203,10 +203,12 @@ class RepomixService:
                 "Repomix is not installed. Install with: npm install -g repomix",
             )
 
+        # Ensure reports/repomix directory exists
+        output_dir = Path(self.repo_path) / "reports" / "repomix"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
         # Determine output file based on format
-        output_file = (
-            f"repomix-output.{output_format if output_format != 'plain' else 'txt'}"
-        )
+        output_file = f"reports/repomix/repomix-output.{output_format if output_format != 'plain' else 'txt'}"
 
         cmd = ["repomix", "--style", output_format, "--output", output_file]
 
@@ -233,11 +235,16 @@ class RepomixService:
         Returns:
             List of paths to Repomix output files
         """
+        # Look in the reports/repomix directory
+        reports_dir = Path(self.repo_path) / "reports" / "repomix"
+        if not reports_dir.exists():
+            return []
+
         patterns = ["repomix-output.*"]
         output_files = []
 
         for pattern in patterns:
-            output_files.extend(self.repo_path.glob(pattern))
+            output_files.extend(reports_dir.glob(pattern))
 
         return sorted(output_files)
 

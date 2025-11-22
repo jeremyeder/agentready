@@ -116,12 +116,9 @@ code .github/coldstart-prompts/01-create-automated-demo.md
 
 ### Creating GitHub Issues
 
-When the repository is on GitHub, you can create issues with:
+When the repository is on GitHub, you can create issues manually using prompts:
 
 ```bash
-# Generate all prompts and create GitHub issues
-python scripts/backlog_to_issues.py --all --create-issues
-
 # Create issue manually using prompt
 gh issue create \
   --title "[P0] Create Automated Demo" \
@@ -136,7 +133,7 @@ gh issue create \
 Each coldstart prompt follows this structure:
 
 1. **Context** - Repository overview, structure, technologies
-2. **Feature Requirements** - Complete requirements from BACKLOG.md
+2. **Feature Requirements** - Complete feature requirements
 3. **Implementation Checklist** - Step-by-step guide
 4. **Key Files to Review** - What to read before starting
 5. **Testing Strategy** - Coverage requirements and test types
@@ -147,12 +144,7 @@ Each coldstart prompt follows this structure:
 
 ## Maintenance
 
-**Updating Prompts**: If BACKLOG.md changes, regenerate prompts:
-
-```bash
-# Regenerate all prompts
-python scripts/backlog_to_issues.py --all
-```
+**Updating Prompts**: Update coldstart prompts manually as features evolve.
 
 **Tracking Progress**: Update status column in tables above as features are completed:
 - 🔴 Not Started
@@ -174,6 +166,4 @@ python scripts/backlog_to_issues.py --all
 
 ---
 
-**Last Updated**: 2025-11-21
-**Generator Script**: `scripts/backlog_to_issues.py`
-**Source Backlog**: `BACKLOG.md`
+**Last Updated**: 2025-11-22

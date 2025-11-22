@@ -49,6 +49,7 @@ coverage.xml
 
 # Project specific
 .agentready/
+reports/
 *.log
 *.tmp
 
@@ -58,4 +59,4 @@ coverage.xml
 
 # Configuration (exclude example)
 .agentready-config.yaml
-!.agentready-config.example.yaml
+!examples/config/agentready-config.example.yaml
