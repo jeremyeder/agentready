@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/ambient-code/agentready/compare/v1.13.0...v1.14.0) (2025-11-22)
+
+
+### Features
+
+* Implement ArchitectureDecisionsAssessor (fixes [#81](https://github.com/ambient-code/agentready/issues/81)) ([#89](https://github.com/ambient-code/agentready/issues/89)) ([9e782e5](https://github.com/ambient-code/agentready/commit/9e782e564ceada2137ade499cdbdb8e3e91ecc03))
+
 # [1.13.0](https://github.com/ambient-code/agentready/compare/v1.12.4...v1.13.0) (2025-11-22)
 
 
