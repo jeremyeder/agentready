@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/ambient-code/agentready/compare/v1.27.0...v1.27.1) (2025-11-23)
+
+
+### Bug Fixes
+
+* Create shared test fixtures and fix Assessment schema issues ([#114](https://github.com/ambient-code/agentready/issues/114)) ([46baa13](https://github.com/ambient-code/agentready/commit/46baa13bb5ab435cec5204355dc52baf5933042f))
+
 # [1.27.0](https://github.com/ambient-code/agentready/compare/v1.26.0...v1.27.0) (2025-11-23)
 
 
