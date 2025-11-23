@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/ambient-code/agentready/compare/v1.27.2...v1.28.0) (2025-11-23)
+
+
+### Features
+
+* implement Phase 2 multi-repository assessment reporting ([#117](https://github.com/ambient-code/agentready/issues/117)) ([8da56c2](https://github.com/ambient-code/agentready/commit/8da56c252bf421f734ff2f7e865c8d29ffd4883b)), closes [#69](https://github.com/ambient-code/agentready/issues/69)
+
 ## [1.27.2](https://github.com/ambient-code/agentready/compare/v1.27.1...v1.27.2) (2025-11-23)
 
 
