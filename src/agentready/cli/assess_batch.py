@@ -152,6 +152,121 @@ def _load_config(config_path: Path) -> Config:
     )
 
 
+def _generate_multi_reports(
+    batch_assessment, output_path: Path, verbose: bool
+) -> None:
+    """Generate all report formats in dated folder structure.
+
+    Phase 2 Reporting:
+    - Creates dated reports folder (reports-YYYYMMDD-HHMMSS/)
+    - Generates SQLite database (all assessments queryable)
+    - Generates CSV/TSV summaries (one row per repo)
+    - Generates aggregated JSON (all assessments in one file)
+    - Generates individual reports (HTML/JSON/MD per repo)
+    - Generates summary HTML (index.html with comparison table)
+
+    Args:
+        batch_assessment: Complete batch assessment with results
+        output_path: Base output directory
+        verbose: Whether to show verbose progress
+    """
+    from ..reporters.csv_reporter import CSVReporter
+    from ..reporters.aggregated_json import AggregatedJSONReporter
+    from ..reporters.multi_html import MultiRepoHTMLReporter
+    from ..reporters.json_reporter import JSONReporter
+
+    # Create dated reports folder
+    timestamp = batch_assessment.timestamp.strftime("%Y%m%d-%H%M%S")
+    reports_dir = output_path / f"reports-{timestamp}"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    if verbose:
+        click.echo(f"\nGenerating reports in {reports_dir}/")
+
+    # 1. CSV/TSV summary
+    try:
+        csv_reporter = CSVReporter()
+        csv_reporter.generate(batch_assessment, reports_dir / "summary.csv", delimiter=",")
+        csv_reporter.generate(batch_assessment, reports_dir / "summary.tsv", delimiter="\t")
+        if verbose:
+            click.echo("  ✓ summary.csv")
+            click.echo("  ✓ summary.tsv")
+    except Exception as e:
+        click.echo(f"  ✗ CSV generation failed: {e}", err=True)
+
+    # 2. Aggregated JSON
+    try:
+        json_reporter = AggregatedJSONReporter()
+        json_reporter.generate(batch_assessment, reports_dir / "all-assessments.json")
+        if verbose:
+            click.echo("  ✓ all-assessments.json")
+    except Exception as e:
+        click.echo(f"  ✗ Aggregated JSON generation failed: {e}", err=True)
+
+    # 3. Individual reports for each successful assessment
+    individual_json = JSONReporter()
+    for result in batch_assessment.results:
+        if result.is_success():
+            assessment = result.assessment
+            base_name = f"{assessment.repository.name}-{assessment.timestamp.strftime('%Y%m%d-%H%M%S')}"
+
+            try:
+                # HTML report
+                html_reporter = HTMLReporter()
+                html_reporter.generate(assessment, reports_dir / f"{base_name}.html")
+
+                # JSON report
+                individual_json.generate(assessment, reports_dir / f"{base_name}.json")
+
+                # Markdown report
+                markdown_reporter = MarkdownReporter()
+                markdown_reporter.generate(assessment, reports_dir / f"{base_name}.md")
+
+                if verbose:
+                    click.echo(f"  ✓ {base_name}.{{html,json,md}}")
+            except Exception as e:
+                click.echo(f"  ✗ Individual reports failed for {base_name}: {e}", err=True)
+
+    # 4. Multi-repo summary HTML (index)
+    try:
+        template_dir = Path(__file__).parent.parent / "templates"
+        multi_html = MultiRepoHTMLReporter(template_dir)
+        multi_html.generate(batch_assessment, reports_dir / "index.html")
+        if verbose:
+            click.echo("  ✓ index.html")
+    except Exception as e:
+        click.echo(f"  ✗ Multi-repo HTML generation failed: {e}", err=True)
+
+    # 5. Failures JSON
+    failed_results = [r for r in batch_assessment.results if not r.is_success()]
+    if failed_results:
+        try:
+            failures_data = [
+                {
+                    "repo_url": r.repository_url,
+                    "error_type": r.error_type,
+                    "error_message": r.error,
+                    "duration_seconds": r.duration_seconds,
+                }
+                for r in failed_results
+            ]
+            with open(reports_dir / "failures.json", "w", encoding="utf-8") as f:
+                json.dump(failures_data, f, indent=2)
+            if verbose:
+                click.echo("  ✓ failures.json")
+        except Exception as e:
+            click.echo(f"  ✗ Failures JSON generation failed: {e}", err=True)
+
+    # Print final summary
+    click.echo(f"\n✓ Reports generated: {reports_dir}/")
+    click.echo(f"  - index.html (summary)")
+    click.echo(f"  - summary.csv & summary.tsv")
+    click.echo(f"  - all-assessments.json")
+    click.echo(f"  - Individual reports per repository")
+    if failed_results:
+        click.echo(f"  - failures.json")
+
+
 @click.command()
 @click.option(
     "--repos-file",
@@ -308,37 +423,8 @@ def assess_batch(
             traceback.print_exc()
         sys.exit(1)
 
-    # Generate timestamp for file naming
-    timestamp = batch_assessment.timestamp.strftime("%Y%m%d-%H%M%S")
-
-    # Save JSON output
-    json_file = output_path / f"batch-{timestamp}.json"
-    try:
-        with open(json_file, "w", encoding="utf-8") as f:
-            json.dump(batch_assessment.to_dict(), f, indent=2)
-        if verbose:
-            click.echo(f"Saved JSON: {json_file}")
-    except IOError as e:
-        click.echo(f"Error saving JSON: {e}", err=True)
-
-    # Generate HTML report (batch report)
-    try:
-        html_reporter = HTMLReporter()
-        html_file = output_path / f"batch-{timestamp}.html"
-        # TODO: Implement batch HTML reporter
-        if verbose:
-            click.echo(f"HTML report not yet implemented")
-    except Exception as e:
-        click.echo(f"Warning: HTML report generation failed: {e}")
-
-    # Generate Markdown report (summary)
-    try:
-        markdown_file = output_path / f"batch-{timestamp}.md"
-        _generate_batch_markdown_report(batch_assessment, markdown_file)
-        if verbose:
-            click.echo(f"Saved Markdown: {markdown_file}")
-    except Exception as e:
-        click.echo(f"Warning: Markdown report generation failed: {e}")
+    # Generate comprehensive Phase 2 reports
+    _generate_multi_reports(batch_assessment, output_path, verbose)
 
     # Print summary
     click.echo("\n" + "=" * 50)
