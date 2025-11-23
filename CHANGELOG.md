@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/ambient-code/agentready/compare/v1.15.0...v1.16.0) (2025-11-23)
+
+
+### Features
+
+* Implement CICDPipelineVisibilityAssessor (fixes [#85](https://github.com/ambient-code/agentready/issues/85)) ([#91](https://github.com/ambient-code/agentready/issues/91)) ([e68285c](https://github.com/ambient-code/agentready/commit/e68285c5ee4f0fc25d776eb46a3e9eb4d228e1e5))
+
 # [1.15.0](https://github.com/ambient-code/agentready/compare/v1.14.0...v1.15.0) (2025-11-23)
 
 
