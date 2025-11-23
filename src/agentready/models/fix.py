@@ -143,13 +143,16 @@ class CommandFix(Fix):
         """Execute the command.
 
         Security: Uses shlex.split() to safely parse commands without shell=True,
-        preventing command injection attacks.
+        preventing command injection attacks. Uses safe_subprocess_run() with
+        timeout to prevent DoS attacks.
         """
         if dry_run:
             return True
 
         import shlex
         import subprocess
+
+        from ..utils.subprocess_utils import safe_subprocess_run, SUBPROCESS_TIMEOUT
 
         cwd = self.working_dir or self.repository_path
 
@@ -162,17 +165,22 @@ class CommandFix(Fix):
             if not cmd_list:
                 return False
 
-            subprocess.run(
+            # Security: Use safe_subprocess_run() with timeout to prevent DoS
+            safe_subprocess_run(
                 cmd_list,
                 cwd=cwd,
                 check=True,
                 capture_output=True,
                 text=True,
-                # Security: Never use shell=True - explicitly removed
+                timeout=SUBPROCESS_TIMEOUT,
             )
             return True
+        except subprocess.TimeoutExpired:
+            # Command timed out - log and return False
+            return False
         except (subprocess.CalledProcessError, ValueError):
             # ValueError can be raised by shlex.split() on malformed input
+            # CalledProcessError means command failed
             return False
 
     def preview(self) -> str:

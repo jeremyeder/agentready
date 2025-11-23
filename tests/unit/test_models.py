@@ -786,6 +786,37 @@ class TestFixModels:
         assert "RUN" in preview
         assert "echo test" in preview
 
+    def test_command_fix_timeout(self, tmp_path):
+        """Test CommandFix handles timeout gracefully."""
+        # Create a command that will timeout (sleep for longer than SUBPROCESS_TIMEOUT)
+        fix = CommandFix(
+            attribute_id="test_attr",
+            description="Run long command",
+            points_gained=10.0,
+            command="sleep 200",  # Longer than 120s timeout
+            working_dir=None,
+            repository_path=tmp_path,
+        )
+
+        # Apply should return False when timeout occurs
+        # Note: This test may take up to 120 seconds to complete
+        result = fix.apply(dry_run=False)
+        assert result is False
+
+    def test_command_fix_apply_success(self, tmp_path):
+        """Test CommandFix.apply() with successful command."""
+        fix = CommandFix(
+            attribute_id="test_attr",
+            description="Run test command",
+            points_gained=10.0,
+            command="echo test",
+            working_dir=None,
+            repository_path=tmp_path,
+        )
+
+        result = fix.apply(dry_run=False)
+        assert result is True
+
     def test_multi_step_fix_construction(self, tmp_path):
         """Test creating a MultiStepFix."""
         fix1 = FileCreationFix(
