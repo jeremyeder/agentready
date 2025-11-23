@@ -7,8 +7,16 @@ import pytest
 
 from agentready.models.assessment import Assessment
 from agentready.models.attribute import Attribute
+from agentready.models.citation import Citation
 from agentready.models.config import Config
+from agentready.models.discovered_skill import DiscoveredSkill
 from agentready.models.finding import Finding, Remediation
+from agentready.models.fix import (
+    CommandFix,
+    FileCreationFix,
+    FileModificationFix,
+    MultiStepFix,
+)
 from agentready.models.metadata import AssessmentMetadata
 from agentready.models.repository import Repository
 
@@ -428,3 +436,749 @@ class TestAssessmentMetadata:
         data = assessment.to_dict()
         assert data["metadata"] is not None
         assert data["metadata"]["agentready_version"] == "1.0.0"
+
+
+class TestDiscoveredSkill:
+    """Test DiscoveredSkill model."""
+
+    def test_valid_construction(self):
+        """Test creating a valid DiscoveredSkill."""
+        skill = DiscoveredSkill(
+            skill_id="test-skill",
+            name="Test Skill",
+            description="Test description",
+            confidence=85.0,
+            source_attribute_id="test_attr",
+            reusability_score=90.0,
+            impact_score=50.0,
+            pattern_summary="Test pattern",
+        )
+
+        assert skill.skill_id == "test-skill"
+        assert skill.name == "Test Skill"
+        assert skill.confidence == 85.0
+        assert skill.reusability_score == 90.0
+        assert skill.impact_score == 50.0
+        assert skill.code_examples == []
+        assert skill.citations == []
+
+    def test_with_code_examples_and_citations(self):
+        """Test DiscoveredSkill with optional fields."""
+        citation = Citation(
+            source="Test Source",
+            title="Test Title",
+            url="https://example.com",
+            relevance="Test relevance",
+        )
+
+        skill = DiscoveredSkill(
+            skill_id="test-skill",
+            name="Test Skill",
+            description="Test description",
+            confidence=85.0,
+            source_attribute_id="test_attr",
+            reusability_score=90.0,
+            impact_score=50.0,
+            pattern_summary="Test pattern",
+            code_examples=["example1", "example2"],
+            citations=[citation],
+        )
+
+        assert len(skill.code_examples) == 2
+        assert len(skill.citations) == 1
+
+    @pytest.mark.parametrize(
+        "field,value,error_match",
+        [
+            ("skill_id", "", "must be non-empty"),
+            ("skill_id", "Invalid ID!", "must be lowercase"),
+            ("skill_id", "Test Skill", "must be lowercase"),
+            ("skill_id", "test skill", "must be lowercase"),
+            ("name", "", "must be non-empty"),
+            ("description", "", "must be non-empty"),
+            ("confidence", -1.0, "must be in range"),
+            ("confidence", 101.0, "must be in range"),
+            ("reusability_score", -1.0, "must be in range"),
+            ("reusability_score", 150.0, "must be in range"),
+            ("impact_score", -1.0, "must be in range"),
+            ("impact_score", 150.0, "must be in range"),
+            ("source_attribute_id", "", "must be non-empty"),
+            ("pattern_summary", "", "must be non-empty"),
+        ],
+    )
+    def test_validation_errors(self, field, value, error_match):
+        """Test DiscoveredSkill validation catches invalid values."""
+        base_data = {
+            "skill_id": "test-skill",
+            "name": "Test Skill",
+            "description": "Test description",
+            "confidence": 85.0,
+            "source_attribute_id": "test_attr",
+            "reusability_score": 90.0,
+            "impact_score": 50.0,
+            "pattern_summary": "Test pattern",
+        }
+        base_data[field] = value
+
+        with pytest.raises(ValueError, match=error_match):
+            DiscoveredSkill(**base_data)
+
+    def test_description_too_long(self):
+        """Test DiscoveredSkill validation for description length."""
+        with pytest.raises(ValueError, match="too long"):
+            DiscoveredSkill(
+                skill_id="test-skill",
+                name="Test Skill",
+                description="x" * 1025,  # Over 1024 chars
+                confidence=85.0,
+                source_attribute_id="test_attr",
+                reusability_score=90.0,
+                impact_score=50.0,
+                pattern_summary="Test pattern",
+            )
+
+    def test_to_dict(self):
+        """Test DiscoveredSkill serialization."""
+        citation = Citation(
+            source="Test Source",
+            title="Test Title",
+            url="https://example.com",
+            relevance="Test relevance",
+        )
+
+        skill = DiscoveredSkill(
+            skill_id="test-skill",
+            name="Test Skill",
+            description="Test description",
+            confidence=85.0,
+            source_attribute_id="test_attr",
+            reusability_score=90.0,
+            impact_score=50.0,
+            pattern_summary="Test pattern",
+            code_examples=["example1"],
+            citations=[citation],
+        )
+
+        data = skill.to_dict()
+
+        assert data["skill_id"] == "test-skill"
+        assert data["name"] == "Test Skill"
+        assert data["confidence"] == 85.0
+        assert data["reusability_score"] == 90.0
+        assert data["impact_score"] == 50.0
+        assert "code_examples" in data
+        assert len(data["code_examples"]) == 1
+        assert "citations" in data
+        assert len(data["citations"]) == 1
+
+    def test_skill_id_format_valid(self):
+        """Test valid skill_id formats."""
+        # lowercase-hyphen format
+        skill = DiscoveredSkill(
+            skill_id="setup-claude-md",
+            name="Test",
+            description="Test",
+            confidence=85.0,
+            source_attribute_id="test",
+            reusability_score=90.0,
+            impact_score=50.0,
+            pattern_summary="Test",
+        )
+        assert skill.skill_id == "setup-claude-md"
+
+        # lowercase-underscore format
+        skill2 = DiscoveredSkill(
+            skill_id="setup_claude_md",
+            name="Test",
+            description="Test",
+            confidence=85.0,
+            source_attribute_id="test",
+            reusability_score=90.0,
+            impact_score=50.0,
+            pattern_summary="Test",
+        )
+        assert skill2.skill_id == "setup_claude_md"
+
+
+class TestFixModels:
+    """Test Fix models."""
+
+    def test_file_creation_fix_construction(self, tmp_path):
+        """Test creating a FileCreationFix."""
+        fix = FileCreationFix(
+            attribute_id="test_attr",
+            description="Create test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            content="Test content",
+            repository_path=tmp_path,
+        )
+
+        assert fix.attribute_id == "test_attr"
+        assert fix.description == "Create test file"
+        assert fix.points_gained == 10.0
+        assert fix.file_path == Path("test.txt")
+        assert fix.content == "Test content"
+
+    def test_file_creation_fix_apply(self, tmp_path):
+        """Test FileCreationFix.apply() creates file."""
+        fix = FileCreationFix(
+            attribute_id="test_attr",
+            description="Create test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            content="Test content",
+            repository_path=tmp_path,
+        )
+
+        result = fix.apply(dry_run=False)
+        assert result is True
+
+        target_file = tmp_path / "test.txt"
+        assert target_file.exists()
+        assert target_file.read_text() == "Test content"
+
+    def test_file_creation_fix_dry_run(self, tmp_path):
+        """Test FileCreationFix.apply() with dry_run."""
+        fix = FileCreationFix(
+            attribute_id="test_attr",
+            description="Create test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            content="Test content",
+            repository_path=tmp_path,
+        )
+
+        result = fix.apply(dry_run=True)
+        assert result is True
+
+        target_file = tmp_path / "test.txt"
+        assert not target_file.exists()
+
+    def test_file_creation_fix_existing_file(self, tmp_path):
+        """Test FileCreationFix fails if file exists."""
+        target_file = tmp_path / "test.txt"
+        target_file.write_text("Existing content")
+
+        fix = FileCreationFix(
+            attribute_id="test_attr",
+            description="Create test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            content="Test content",
+            repository_path=tmp_path,
+        )
+
+        result = fix.apply(dry_run=False)
+        assert result is False
+
+    def test_file_creation_fix_preview(self, tmp_path):
+        """Test FileCreationFix.preview()."""
+        fix = FileCreationFix(
+            attribute_id="test_attr",
+            description="Create test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            content="Test content",
+            repository_path=tmp_path,
+        )
+
+        preview = fix.preview()
+        assert "CREATE" in preview
+        assert "test.txt" in preview
+
+    def test_file_modification_fix_construction(self, tmp_path):
+        """Test creating a FileModificationFix."""
+        fix = FileModificationFix(
+            attribute_id="test_attr",
+            description="Modify test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            additions=["line1", "line2"],
+            repository_path=tmp_path,
+            append=True,
+        )
+
+        assert fix.attribute_id == "test_attr"
+        assert len(fix.additions) == 2
+        assert fix.append is True
+
+    def test_file_modification_fix_apply_append(self, tmp_path):
+        """Test FileModificationFix.apply() with append mode."""
+        target_file = tmp_path / "test.txt"
+        target_file.write_text("Existing content\n")
+
+        fix = FileModificationFix(
+            attribute_id="test_attr",
+            description="Modify test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            additions=["line1", "line2"],
+            repository_path=tmp_path,
+            append=True,
+        )
+
+        result = fix.apply(dry_run=False)
+        assert result is True
+
+        content = target_file.read_text()
+        assert "Existing content" in content
+        assert "line1" in content
+        assert "line2" in content
+
+    def test_file_modification_fix_missing_file(self, tmp_path):
+        """Test FileModificationFix fails if file doesn't exist."""
+        fix = FileModificationFix(
+            attribute_id="test_attr",
+            description="Modify test file",
+            points_gained=10.0,
+            file_path=Path("nonexistent.txt"),
+            additions=["line1"],
+            repository_path=tmp_path,
+        )
+
+        result = fix.apply(dry_run=False)
+        assert result is False
+
+    def test_file_modification_fix_preview(self, tmp_path):
+        """Test FileModificationFix.preview()."""
+        fix = FileModificationFix(
+            attribute_id="test_attr",
+            description="Modify test file",
+            points_gained=10.0,
+            file_path=Path("test.txt"),
+            additions=["line1", "line2"],
+            repository_path=tmp_path,
+        )
+
+        preview = fix.preview()
+        assert "MODIFY" in preview
+        assert "test.txt" in preview
+        assert "+2" in preview
+
+    def test_command_fix_construction(self, tmp_path):
+        """Test creating a CommandFix."""
+        fix = CommandFix(
+            attribute_id="test_attr",
+            description="Run test command",
+            points_gained=10.0,
+            command="echo test",
+            working_dir=None,
+            repository_path=tmp_path,
+        )
+
+        assert fix.attribute_id == "test_attr"
+        assert fix.command == "echo test"
+        assert fix.working_dir is None
+
+    def test_command_fix_preview(self, tmp_path):
+        """Test CommandFix.preview()."""
+        fix = CommandFix(
+            attribute_id="test_attr",
+            description="Run test command",
+            points_gained=10.0,
+            command="echo test",
+            working_dir=None,
+            repository_path=tmp_path,
+        )
+
+        preview = fix.preview()
+        assert "RUN" in preview
+        assert "echo test" in preview
+
+    def test_multi_step_fix_construction(self, tmp_path):
+        """Test creating a MultiStepFix."""
+        fix1 = FileCreationFix(
+            attribute_id="test",
+            description="Create file",
+            points_gained=5.0,
+            file_path=Path("test.txt"),
+            content="Test",
+            repository_path=tmp_path,
+        )
+
+        fix2 = CommandFix(
+            attribute_id="test",
+            description="Run command",
+            points_gained=5.0,
+            command="echo test",
+            working_dir=None,
+            repository_path=tmp_path,
+        )
+
+        multi_fix = MultiStepFix(
+            attribute_id="test_attr",
+            description="Multi-step fix",
+            points_gained=10.0,
+            steps=[fix1, fix2],
+        )
+
+        assert multi_fix.attribute_id == "test_attr"
+        assert len(multi_fix.steps) == 2
+
+    def test_multi_step_fix_apply(self, tmp_path):
+        """Test MultiStepFix.apply() executes all steps."""
+        fix1 = FileCreationFix(
+            attribute_id="test",
+            description="Create file",
+            points_gained=5.0,
+            file_path=Path("test.txt"),
+            content="Test",
+            repository_path=tmp_path,
+        )
+
+        fix2 = FileCreationFix(
+            attribute_id="test",
+            description="Create file",
+            points_gained=5.0,
+            file_path=Path("test2.txt"),
+            content="Test2",
+            repository_path=tmp_path,
+        )
+
+        multi_fix = MultiStepFix(
+            attribute_id="test_attr",
+            description="Multi-step fix",
+            points_gained=10.0,
+            steps=[fix1, fix2],
+        )
+
+        result = multi_fix.apply(dry_run=False)
+        assert result is True
+
+        assert (tmp_path / "test.txt").exists()
+        assert (tmp_path / "test2.txt").exists()
+
+    def test_multi_step_fix_preview(self, tmp_path):
+        """Test MultiStepFix.preview()."""
+        fix1 = FileCreationFix(
+            attribute_id="test",
+            description="Create file",
+            points_gained=5.0,
+            file_path=Path("test.txt"),
+            content="Test",
+            repository_path=tmp_path,
+        )
+
+        fix2 = CommandFix(
+            attribute_id="test",
+            description="Run command",
+            points_gained=5.0,
+            command="echo test",
+            working_dir=None,
+            repository_path=tmp_path,
+        )
+
+        multi_fix = MultiStepFix(
+            attribute_id="test_attr",
+            description="Multi-step fix",
+            points_gained=10.0,
+            steps=[fix1, fix2],
+        )
+
+        preview = multi_fix.preview()
+        assert "MULTI-STEP" in preview
+        assert "2 steps" in preview
+        assert "CREATE" in preview
+        assert "RUN" in preview
+
+
+class TestFindingFactories:
+    """Test Finding factory methods."""
+
+    def test_finding_not_applicable_factory(self):
+        """Test Finding.not_applicable() factory method."""
+        attr = Attribute(
+            id="test_attr",
+            name="Test",
+            category="Testing",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        finding = Finding.not_applicable(attr, reason="Not a Python project")
+
+        assert finding.status == "not_applicable"
+        assert finding.score is None
+        assert finding.measured_value is None
+        assert finding.threshold is None
+        assert "Not a Python project" in finding.evidence
+        assert finding.remediation is None
+        assert finding.error_message is None
+
+    def test_finding_not_applicable_no_reason(self):
+        """Test Finding.not_applicable() without reason."""
+        attr = Attribute(
+            id="test_attr",
+            name="Test",
+            category="Testing",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        finding = Finding.not_applicable(attr)
+
+        assert finding.status == "not_applicable"
+        assert finding.evidence == []
+
+    def test_finding_skipped_factory_with_remediation(self):
+        """Test Finding.skipped() factory method with remediation."""
+        attr = Attribute(
+            id="test_attr",
+            name="Test",
+            category="Testing",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        finding = Finding.skipped(
+            attr, reason="Missing pytest", remediation="Install pytest with pip"
+        )
+
+        assert finding.status == "skipped"
+        assert finding.score is None
+        assert "Missing pytest" in finding.evidence
+        assert finding.remediation is not None
+        assert finding.remediation.summary == "Install pytest with pip"
+        assert finding.error_message is None
+
+    def test_finding_skipped_factory_without_remediation(self):
+        """Test Finding.skipped() factory method without remediation."""
+        attr = Attribute(
+            id="test_attr",
+            name="Test",
+            category="Testing",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        finding = Finding.skipped(attr, reason="Missing tool")
+
+        assert finding.status == "skipped"
+        assert finding.remediation is None
+
+    def test_finding_error_factory(self):
+        """Test Finding.error() factory method."""
+        attr = Attribute(
+            id="test_attr",
+            name="Test",
+            category="Testing",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        finding = Finding.error(attr, reason="Unexpected exception occurred")
+
+        assert finding.status == "error"
+        assert finding.score is None
+        assert finding.measured_value is None
+        assert finding.threshold is None
+        assert finding.evidence == []
+        assert finding.remediation is None
+        assert finding.error_message == "Unexpected exception occurred"
+
+
+class TestFindingValidation:
+    """Test Finding validation beyond existing tests."""
+
+    def test_finding_pass_requires_score(self):
+        """Test Finding with pass status requires score."""
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        with pytest.raises(ValueError, match="Score required"):
+            Finding(
+                attribute=attr,
+                status="pass",
+                score=None,
+                measured_value="test",
+                threshold="test",
+                evidence=[],
+                remediation=None,
+                error_message=None,
+            )
+
+    def test_finding_fail_requires_score(self):
+        """Test Finding with fail status requires score."""
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        with pytest.raises(ValueError, match="Score required"):
+            Finding(
+                attribute=attr,
+                status="fail",
+                score=None,
+                measured_value="test",
+                threshold="test",
+                evidence=[],
+                remediation=None,
+                error_message=None,
+            )
+
+    def test_finding_score_out_of_range(self):
+        """Test Finding validation for score range."""
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        with pytest.raises(ValueError, match="must be in range"):
+            Finding(
+                attribute=attr,
+                status="pass",
+                score=150.0,
+                measured_value="test",
+                threshold="test",
+                evidence=[],
+                remediation=None,
+                error_message=None,
+            )
+
+    def test_finding_error_requires_message(self):
+        """Test Finding with error status requires error_message."""
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        with pytest.raises(ValueError, match="Error message required"):
+            Finding(
+                attribute=attr,
+                status="error",
+                score=None,
+                measured_value=None,
+                threshold=None,
+                evidence=[],
+                remediation=None,
+                error_message=None,
+            )
+
+    def test_finding_to_dict_with_remediation(self):
+        """Test Finding.to_dict() with remediation."""
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        remediation = Remediation(
+            summary="Fix it",
+            steps=["Step 1"],
+            tools=["tool1"],
+            commands=["cmd1"],
+            examples=["ex1"],
+            citations=[],
+        )
+
+        finding = Finding(
+            attribute=attr,
+            status="fail",
+            score=0.0,
+            measured_value="missing",
+            threshold="present",
+            evidence=["File not found"],
+            remediation=remediation,
+            error_message=None,
+        )
+
+        data = finding.to_dict()
+
+        assert data["status"] == "fail"
+        assert data["score"] == 0.0
+        assert data["remediation"] is not None
+        assert data["remediation"]["summary"] == "Fix it"
+
+    def test_finding_to_dict_without_remediation(self):
+        """Test Finding.to_dict() without remediation."""
+        attr = Attribute(
+            id="test",
+            name="Test",
+            category="Test",
+            tier=1,
+            description="Test",
+            criteria="Test",
+            default_weight=0.04,
+        )
+
+        finding = Finding(
+            attribute=attr,
+            status="pass",
+            score=100.0,
+            measured_value="present",
+            threshold="present",
+            evidence=["File found"],
+            remediation=None,
+            error_message=None,
+        )
+
+        data = finding.to_dict()
+
+        assert data["status"] == "pass"
+        assert data["score"] == 100.0
+        assert data["remediation"] is None
+
+
+class TestRemediationValidation:
+    """Test Remediation validation."""
+
+    def test_remediation_empty_summary(self):
+        """Test Remediation validation for empty summary."""
+        with pytest.raises(ValueError, match="summary must be non-empty"):
+            Remediation(
+                summary="",
+                steps=["Step 1"],
+                tools=[],
+                commands=[],
+                examples=[],
+                citations=[],
+            )
+
+    def test_remediation_empty_steps(self):
+        """Test Remediation validation for empty steps."""
+        with pytest.raises(ValueError, match="at least one step"):
+            Remediation(
+                summary="Fix it",
+                steps=[],
+                tools=[],
+                commands=[],
+                examples=[],
+                citations=[],
+            )
