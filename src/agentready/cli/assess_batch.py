@@ -11,7 +11,7 @@ from ..models.config import Config
 from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
 from ..services.batch_scanner import BatchScanner
-from ..utils.subprocess_utils import safe_subprocess_run
+from ..utils.security import validate_config_dict, validate_path
 
 
 def _get_agentready_version() -> str:
@@ -65,96 +65,70 @@ def _create_all_assessors():
 
 
 def _load_config(config_path: Path) -> Config:
-    """Load configuration from YAML file with validation."""
+    """Load configuration from YAML file with validation.
+
+    Uses centralized security utilities from utils.security module.
+    """
     import yaml
 
     with open(config_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    # Validate data is a dict
-    if not isinstance(data, dict):
-        raise ValueError(
-            f"Config must be a YAML object/dict, got {type(data).__name__}"
-        )
-
-    # Validate expected keys and reject unknown keys
-    allowed_keys = {
-        "weights",
-        "excluded_attributes",
-        "language_overrides",
-        "output_dir",
-        "report_theme",
-        "custom_theme",
+    # Define config schema for validation
+    schema = {
+        "weights": {str: (int, float)},
+        "excluded_attributes": [str],
+        "language_overrides": {str: list},
+        "output_dir": str,
+        "report_theme": str,
+        "custom_theme": dict,
     }
-    unknown_keys = set(data.keys()) - allowed_keys
-    if unknown_keys:
-        raise ValueError(f"Unknown config keys: {', '.join(sorted(unknown_keys))}")
 
-    # Validate weights
-    weights = data.get("weights", {})
-    if not isinstance(weights, dict):
-        raise ValueError(f"'weights' must be a dict, got {type(weights).__name__}")
-    for key, value in weights.items():
-        if not isinstance(key, str):
-            raise ValueError(f"Weight keys must be strings, got {type(key).__name__}")
-        if not isinstance(value, (int, float)):
-            raise ValueError(
-                f"Weight values must be numbers, got {type(value).__name__} for '{key}'"
-            )
+    # Validate config structure using centralized utility
+    validated = validate_config_dict(data, schema)
 
-    # Validate excluded_attributes
-    excluded = data.get("excluded_attributes", [])
-    if not isinstance(excluded, list):
-        raise ValueError(
-            f"'excluded_attributes' must be a list, got {type(excluded).__name__}"
-        )
-    for item in excluded:
-        if not isinstance(item, str):
-            raise ValueError(
-                f"'excluded_attributes' items must be strings, got {type(item).__name__}"
-            )
-
-    # Validate language_overrides
-    lang_overrides = data.get("language_overrides", {})
-    if not isinstance(lang_overrides, dict):
-        raise ValueError(
-            f"'language_overrides' must be a dict, got {type(lang_overrides).__name__}"
-        )
-    for lang, patterns in lang_overrides.items():
-        if not isinstance(lang, str):
-            raise ValueError(
-                f"'language_overrides' keys must be strings, got {type(lang).__name__}"
-            )
-        if not isinstance(patterns, list):
-            raise ValueError(
-                f"'language_overrides' values must be lists, got {type(patterns).__name__}"
-            )
-        for pattern in patterns:
-            if not isinstance(pattern, str):
+    # Additional nested validations for complex types
+    if "language_overrides" in validated:
+        for lang, patterns in validated["language_overrides"].items():
+            if not isinstance(patterns, list):
                 raise ValueError(
-                    f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
+                    f"'language_overrides' values must be lists, got {type(patterns).__name__}"
+                )
+            for pattern in patterns:
+                if not isinstance(pattern, str):
+                    raise ValueError(
+                        f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
+                    )
+
+    if "custom_theme" in validated:
+        for key, value in validated["custom_theme"].items():
+            if not isinstance(key, str):
+                raise ValueError(
+                    f"'custom_theme' keys must be strings, got {type(key).__name__}"
+                )
+            if not isinstance(value, str):
+                raise ValueError(
+                    f"'custom_theme' values must be strings, got {type(value).__name__}"
                 )
 
-    # Validate output_dir
-    output_dir = data.get("output_dir")
-    if output_dir is not None and not isinstance(output_dir, str):
-        raise ValueError(
-            f"'output_dir' must be string or null, got {type(output_dir).__name__}"
+    # Validate and sanitize output_dir path
+    output_dir = None
+    if "output_dir" in validated:
+        output_dir = validate_path(
+            validated["output_dir"], allow_system_dirs=False, must_exist=False
         )
 
     return Config(
-        weights=weights,
-        excluded_attributes=excluded,
-        language_overrides=lang_overrides,
-        output_dir=Path(output_dir) if output_dir else None,
-        report_theme=data.get("report_theme", "default"),
-        custom_theme=data.get("custom_theme"),
+        weights=validated.get("weights", {}),
+        excluded_attributes=validated.get("excluded_attributes", []),
+        language_overrides=validated.get("language_overrides", {}),
+        output_dir=output_dir,
+        report_theme=validated.get("report_theme", "default"),
+        custom_theme=validated.get("custom_theme"),
     )
 
 
-def _generate_multi_reports(
-    batch_assessment, output_path: Path, verbose: bool
-) -> None:
+def _generate_multi_reports(batch_assessment, output_path: Path, verbose: bool) -> None:
     """Generate all report formats in dated folder structure.
 
     Phase 2 Reporting:
@@ -170,10 +144,10 @@ def _generate_multi_reports(
         output_path: Base output directory
         verbose: Whether to show verbose progress
     """
-    from ..reporters.csv_reporter import CSVReporter
     from ..reporters.aggregated_json import AggregatedJSONReporter
-    from ..reporters.multi_html import MultiRepoHTMLReporter
+    from ..reporters.csv_reporter import CSVReporter
     from ..reporters.json_reporter import JSONReporter
+    from ..reporters.multi_html import MultiRepoHTMLReporter
 
     # Create dated reports folder
     timestamp = batch_assessment.timestamp.strftime("%Y%m%d-%H%M%S")
@@ -186,8 +160,12 @@ def _generate_multi_reports(
     # 1. CSV/TSV summary
     try:
         csv_reporter = CSVReporter()
-        csv_reporter.generate(batch_assessment, reports_dir / "summary.csv", delimiter=",")
-        csv_reporter.generate(batch_assessment, reports_dir / "summary.tsv", delimiter="\t")
+        csv_reporter.generate(
+            batch_assessment, reports_dir / "summary.csv", delimiter=","
+        )
+        csv_reporter.generate(
+            batch_assessment, reports_dir / "summary.tsv", delimiter="\t"
+        )
         if verbose:
             click.echo("  ✓ summary.csv")
             click.echo("  ✓ summary.tsv")
@@ -225,7 +203,9 @@ def _generate_multi_reports(
                 if verbose:
                     click.echo(f"  ✓ {base_name}.{{html,json,md}}")
             except Exception as e:
-                click.echo(f"  ✗ Individual reports failed for {base_name}: {e}", err=True)
+                click.echo(
+                    f"  ✗ Individual reports failed for {base_name}: {e}", err=True
+                )
 
     # 4. Multi-repo summary HTML (index)
     try:
@@ -259,12 +239,12 @@ def _generate_multi_reports(
 
     # Print final summary
     click.echo(f"\n✓ Reports generated: {reports_dir}/")
-    click.echo(f"  - index.html (summary)")
-    click.echo(f"  - summary.csv & summary.tsv")
-    click.echo(f"  - all-assessments.json")
-    click.echo(f"  - Individual reports per repository")
+    click.echo("  - index.html (summary)")
+    click.echo("  - summary.csv & summary.tsv")
+    click.echo("  - all-assessments.json")
+    click.echo("  - Individual reports per repository")
     if failed_results:
-        click.echo(f"  - failures.json")
+        click.echo("  - failures.json")
 
 
 @click.command()
@@ -573,7 +553,9 @@ def _generate_batch_markdown_report(batch_assessment, output_file: Path) -> None
         lines.append(f"\n### {result.repository_url}\n")
         if result.is_success():
             lines.append(f"- **Score**: {result.assessment.overall_score}/100\n")
-            lines.append(f"- **Certification**: {result.assessment.certification_level}\n")
+            lines.append(
+                f"- **Certification**: {result.assessment.certification_level}\n"
+            )
             lines.append(f"- **Duration**: {result.duration_seconds:.1f}s\n")
             lines.append(f"- **Cached**: {result.cached}\n")
         else:

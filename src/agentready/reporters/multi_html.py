@@ -8,11 +8,11 @@ SECURITY: Implements comprehensive XSS prevention through:
 
 import html
 from pathlib import Path
-from urllib.parse import urlparse
 
 import jinja2
 
 from ..models.batch_assessment import BatchAssessment
+from ..utils.security import validate_url
 
 
 class MultiRepoHTMLReporter:
@@ -50,8 +50,8 @@ class MultiRepoHTMLReporter:
     def sanitize_url(url: str) -> str:
         """Validate and sanitize URLs for safe HTML rendering.
 
-        SECURITY: Only allow http/https schemes. Prevents javascript:,
-        data:, file:, and other potentially malicious URL schemes.
+        SECURITY: Uses centralized security utilities for URL validation
+        and HTML escaping.
 
         Args:
             url: URL to sanitize
@@ -69,14 +69,12 @@ class MultiRepoHTMLReporter:
             return ""
 
         try:
-            parsed = urlparse(url)
-            # SECURITY: Only allow http/https schemes
-            if parsed.scheme not in ("http", "https", ""):
-                return ""
-            # SECURITY: HTML-escape the URL to prevent attribute injection
-            return html.escape(url, quote=True)
-        except Exception:
-            # Failed to parse - treat as unsafe
+            # Use centralized URL validation
+            validated = validate_url(url, allowed_schemes=["http", "https"])
+            # HTML-escape to prevent attribute injection
+            return html.escape(validated, quote=True)
+        except ValueError:
+            # Invalid URL - treat as unsafe
             return ""
 
     def generate(self, batch_assessment: BatchAssessment, output_path: Path) -> Path:
