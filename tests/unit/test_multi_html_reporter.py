@@ -190,7 +190,10 @@ class TestMultiRepoHTMLReporter:
         html_content = temp_html_file.read_text(encoding="utf-8")
 
         # Verify XSS payload is escaped (not checking for legitimate script tags)
-        assert "alert('XSS')" not in html_content or "&lt;script&gt;alert('XSS')&lt;/script&gt;" in html_content
+        assert (
+            "alert('XSS')" not in html_content
+            or "&lt;script&gt;alert('XSS')&lt;/script&gt;" in html_content
+        )
         # Verify the escaped version exists
         assert "&lt;script&gt;" in html_content
 
