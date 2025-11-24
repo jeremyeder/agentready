@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/ambient-code/agentready/compare/v2.0.0...v2.1.0) (2025-11-24)
+
+
+### Features
+
+* Phase 1 Task 1 - Consolidate Security Validation Patterns ([#129](https://github.com/ambient-code/agentready/issues/129)) ([8580c45](https://github.com/ambient-code/agentready/commit/8580c45fdd24e6c485f107098e829b626969db0b)), closes [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122)
+
 # [2.0.0](https://github.com/ambient-code/agentready/compare/v1.29.0...v2.0.0) (2025-11-24)
 
 
