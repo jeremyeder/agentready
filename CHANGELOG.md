@@ -1,3 +1,51 @@
+# [2.5.0](https://github.com/ambient-code/agentready/compare/v2.4.0...v2.5.0) (2025-11-24)
+
+
+### Features
+
+* Batch Report Enhancements + Bootstrap Template Inheritance (Phase 2 Task 5) ([#133](https://github.com/ambient-code/agentready/issues/133)) ([7762b23](https://github.com/ambient-code/agentready/commit/7762b23ed7f8cd90fce56244c963ee2f887ee704))
+
+# [2.4.0](https://github.com/ambient-code/agentready/compare/v2.3.0...v2.4.0) (2025-11-24)
+
+
+### Features
+
+* Phase 2 Task 4 - Replace manual config validation with Pydantic ([#134](https://github.com/ambient-code/agentready/issues/134)) ([d83cf58](https://github.com/ambient-code/agentready/commit/d83cf58a6eb0b1f889a3cfc49a8fb816db2a1f3e))
+
+# [2.3.0](https://github.com/ambient-code/agentready/compare/v2.2.0...v2.3.0) (2025-11-24)
+
+
+### Features
+
+* Standardize on Python 3.12+ with forward compatibility for 3.13 ([#132](https://github.com/ambient-code/agentready/issues/132)) ([84f2c46](https://github.com/ambient-code/agentready/commit/84f2c467eac64d0d0bd9b4189c0290325ae5933b))
+
+# [2.2.0](https://github.com/ambient-code/agentready/compare/v2.1.0...v2.2.0) (2025-11-24)
+
+
+### Features
+
+* Phase 1 Tasks 2-3 - Consolidate Reporter Base & Assessor Factory ([#131](https://github.com/ambient-code/agentready/issues/131)) ([8e12bf9](https://github.com/ambient-code/agentready/commit/8e12bf9d6f80d7a877e65900cdf9edb045fe5378)), closes [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122)
+
+# [2.1.0](https://github.com/ambient-code/agentready/compare/v2.0.0...v2.1.0) (2025-11-24)
+
+
+### Features
+
+* Phase 1 Task 1 - Consolidate Security Validation Patterns ([#129](https://github.com/ambient-code/agentready/issues/129)) ([8580c45](https://github.com/ambient-code/agentready/commit/8580c45fdd24e6c485f107098e829b626969db0b)), closes [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122) [#122](https://github.com/ambient-code/agentready/issues/122)
+
+# [2.0.0](https://github.com/ambient-code/agentready/compare/v1.29.0...v2.0.0) (2025-11-24)
+
+
+### Features
+
+* Rename 'learn' command to 'extract-skills' for clarity ([#125](https://github.com/ambient-code/agentready/issues/125)) ([64d6563](https://github.com/ambient-code/agentready/commit/64d65632a5c6b37e3193bfccd62ab0f8eb7c4eb6)), closes [hi#scoring](https://github.com/hi/issues/scoring) [#123](https://github.com/ambient-code/agentready/issues/123)
+
+
+### BREAKING CHANGES
+
+* Users must update scripts from 'agentready learn'
+to 'agentready extract-skills'. All flags and options remain identical.
+
 # [1.29.0](https://github.com/ambient-code/agentready/compare/v1.28.0...v1.29.0) (2025-11-23)
 
 

@@ -1,15 +1,15 @@
 """Schema validation service for AgentReady assessment reports."""
 
-import importlib.util
 import json
 from pathlib import Path
 from typing import Any
 
-if importlib.util.find_spec("jsonschema") is not None:
+try:
+    import jsonschema  # noqa: F401
     from jsonschema import Draft7Validator, validators
 
     JSONSCHEMA_AVAILABLE = True
-else:
+except ImportError:
     JSONSCHEMA_AVAILABLE = False
 
 

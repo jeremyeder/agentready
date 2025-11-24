@@ -376,37 +376,10 @@ def demo(language, no_browser, keep_repo):
         click.echo()
 
         # Import assessors here to avoid circular import
-        from ..assessors.code_quality import (
-            CyclomaticComplexityAssessor,
-            TypeAnnotationsAssessor,
-        )
-        from ..assessors.documentation import CLAUDEmdAssessor, READMEAssessor
-        from ..assessors.structure import StandardLayoutAssessor
-        from ..assessors.stub_assessors import (
-            ConventionalCommitsAssessor,
-            GitignoreAssessor,
-            LockFilesAssessor,
-            create_stub_assessors,
-        )
-        from ..assessors.testing import PreCommitHooksAssessor, TestCoverageAssessor
+        from ..assessors import create_all_assessors
 
         # Create all 25 assessors
-        assessors = [
-            # Tier 1 Essential (5 assessors)
-            CLAUDEmdAssessor(),
-            READMEAssessor(),
-            TypeAnnotationsAssessor(),
-            StandardLayoutAssessor(),
-            LockFilesAssessor(),
-            # Tier 2 Critical (10 assessors - 3 implemented, 7 stubs)
-            TestCoverageAssessor(),
-            PreCommitHooksAssessor(),
-            ConventionalCommitsAssessor(),
-            GitignoreAssessor(),
-            CyclomaticComplexityAssessor(),  # Actually Tier 3, but including here
-        ]
-        # Add remaining stub assessors
-        assessors.extend(create_stub_assessors())
+        assessors = create_all_assessors()
 
         # Show progress with actual assessor execution
         start_time = time.time()

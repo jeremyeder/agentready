@@ -6,7 +6,9 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from pydantic import ValidationError
 
+from ..assessors import create_all_assessors
 from ..models.config import Config
 from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
@@ -26,129 +28,45 @@ def _get_agentready_version() -> str:
         return "unknown"
 
 
-def _create_all_assessors():
-    """Create all 25 assessors for assessment."""
-    from ..assessors.code_quality import (
-        CyclomaticComplexityAssessor,
-        TypeAnnotationsAssessor,
-    )
-    from ..assessors.documentation import CLAUDEmdAssessor, READMEAssessor
-    from ..assessors.structure import StandardLayoutAssessor
-    from ..assessors.stub_assessors import (
-        ConventionalCommitsAssessor,
-        GitignoreAssessor,
-        LockFilesAssessor,
-        create_stub_assessors,
-    )
-    from ..assessors.testing import PreCommitHooksAssessor, TestCoverageAssessor
-
-    assessors = [
-        # Tier 1 Essential (5 assessors)
-        CLAUDEmdAssessor(),
-        READMEAssessor(),
-        TypeAnnotationsAssessor(),
-        StandardLayoutAssessor(),
-        LockFilesAssessor(),
-        # Tier 2 Critical (10 assessors - 3 implemented, 7 stubs)
-        TestCoverageAssessor(),
-        PreCommitHooksAssessor(),
-        ConventionalCommitsAssessor(),
-        GitignoreAssessor(),
-        CyclomaticComplexityAssessor(),
-    ]
-
-    # Add remaining stub assessors
-    assessors.extend(create_stub_assessors())
-
-    return assessors
-
-
 def _load_config(config_path: Path) -> Config:
-    """Load configuration from YAML file with validation."""
+    """Load configuration from YAML file with Pydantic validation.
+
+    Uses Pydantic for automatic validation, replacing duplicated manual
+    validation code with the Config.from_yaml_dict() classmethod.
+
+    Args:
+        config_path: Path to YAML configuration file
+
+    Returns:
+        Validated Config instance
+
+    Raises:
+        ValidationError: If YAML data doesn't match expected schema
+        FileNotFoundError: If config file doesn't exist
+        yaml.YAMLError: If YAML parsing fails
+    """
+    import sys
+
     import yaml
 
-    with open(config_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
 
-    # Validate data is a dict
-    if not isinstance(data, dict):
-        raise ValueError(
-            f"Config must be a YAML object/dict, got {type(data).__name__}"
-        )
+        # Pydantic handles all validation automatically
+        return Config.from_yaml_dict(data)
+    except ValidationError as e:
+        # Convert Pydantic validation errors to user-friendly messages
+        errors = []
+        for error in e.errors():
+            field = " → ".join(str(x) for x in error["loc"])
+            msg = error["msg"]
+            errors.append(f"  - {field}: {msg}")
 
-    # Validate expected keys and reject unknown keys
-    allowed_keys = {
-        "weights",
-        "excluded_attributes",
-        "language_overrides",
-        "output_dir",
-        "report_theme",
-        "custom_theme",
-    }
-    unknown_keys = set(data.keys()) - allowed_keys
-    if unknown_keys:
-        raise ValueError(f"Unknown config keys: {', '.join(sorted(unknown_keys))}")
-
-    # Validate weights
-    weights = data.get("weights", {})
-    if not isinstance(weights, dict):
-        raise ValueError(f"'weights' must be a dict, got {type(weights).__name__}")
-    for key, value in weights.items():
-        if not isinstance(key, str):
-            raise ValueError(f"Weight keys must be strings, got {type(key).__name__}")
-        if not isinstance(value, (int, float)):
-            raise ValueError(
-                f"Weight values must be numbers, got {type(value).__name__} for '{key}'"
-            )
-
-    # Validate excluded_attributes
-    excluded = data.get("excluded_attributes", [])
-    if not isinstance(excluded, list):
-        raise ValueError(
-            f"'excluded_attributes' must be a list, got {type(excluded).__name__}"
-        )
-    for item in excluded:
-        if not isinstance(item, str):
-            raise ValueError(
-                f"'excluded_attributes' items must be strings, got {type(item).__name__}"
-            )
-
-    # Validate language_overrides
-    lang_overrides = data.get("language_overrides", {})
-    if not isinstance(lang_overrides, dict):
-        raise ValueError(
-            f"'language_overrides' must be a dict, got {type(lang_overrides).__name__}"
-        )
-    for lang, patterns in lang_overrides.items():
-        if not isinstance(lang, str):
-            raise ValueError(
-                f"'language_overrides' keys must be strings, got {type(lang).__name__}"
-            )
-        if not isinstance(patterns, list):
-            raise ValueError(
-                f"'language_overrides' values must be lists, got {type(patterns).__name__}"
-            )
-        for pattern in patterns:
-            if not isinstance(pattern, str):
-                raise ValueError(
-                    f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
-                )
-
-    # Validate output_dir
-    output_dir = data.get("output_dir")
-    if output_dir is not None and not isinstance(output_dir, str):
-        raise ValueError(
-            f"'output_dir' must be string or null, got {type(output_dir).__name__}"
-        )
-
-    return Config(
-        weights=weights,
-        excluded_attributes=excluded,
-        language_overrides=lang_overrides,
-        output_dir=Path(output_dir) if output_dir else None,
-        report_theme=data.get("report_theme", "default"),
-        custom_theme=data.get("custom_theme"),
-    )
+        click.echo("Configuration validation failed:", err=True)
+        for error in errors:
+            click.echo(error, err=True)
+        sys.exit(1)
 
 
 def _generate_multi_reports(batch_assessment, output_path: Path, verbose: bool) -> None:
@@ -464,7 +382,7 @@ def assess_batch(
     )
 
     # Create assessors
-    assessors = _create_all_assessors()
+    assessors = create_all_assessors()
 
     if verbose:
         click.echo(f"Assessors: {len(assessors)}")

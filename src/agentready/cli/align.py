@@ -119,7 +119,7 @@ def align(repository, dry_run, attributes, interactive):
 
     fixer_service = FixerService()
     fix_plan = fixer_service.generate_fix_plan(
-        assessment, scanner.repository, attribute_list
+        assessment, assessment.repository, attribute_list
     )
 
     if not fix_plan.fixes:

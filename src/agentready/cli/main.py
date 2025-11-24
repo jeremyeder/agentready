@@ -12,41 +12,9 @@ except ImportError:
     # Python 3.7 compatibility
     from importlib_metadata import version as get_version
 
-from ..assessors.code_quality import (
-    CodeSmellsAssessor,
-    CyclomaticComplexityAssessor,
-    SemanticNamingAssessor,
-    StructuredLoggingAssessor,
-    TypeAnnotationsAssessor,
-)
+from pydantic import ValidationError
 
-# Import all assessors
-from ..assessors.documentation import (
-    ArchitectureDecisionsAssessor,
-    CLAUDEmdAssessor,
-    ConciseDocumentationAssessor,
-    InlineDocumentationAssessor,
-    OpenAPISpecsAssessor,
-    READMEAssessor,
-)
-from ..assessors.structure import (
-    IssuePRTemplatesAssessor,
-    OneCommandSetupAssessor,
-    SeparationOfConcernsAssessor,
-    StandardLayoutAssessor,
-)
-from ..assessors.stub_assessors import (
-    ConventionalCommitsAssessor,
-    GitignoreAssessor,
-    LockFilesAssessor,
-    create_stub_assessors,
-)
-from ..assessors.testing import (
-    BranchProtectionAssessor,
-    CICDPipelineVisibilityAssessor,
-    PreCommitHooksAssessor,
-    TestCoverageAssessor,
-)
+from ..assessors import create_all_assessors
 from ..models.config import Config
 from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
@@ -58,6 +26,7 @@ from .assess_batch import assess_batch
 from .bootstrap import bootstrap
 from .demo import demo
 from .experiment import experiment
+from .extract_skills import extract_skills
 from .learn import learn
 from .repomix import repomix_generate
 from .research import research
@@ -74,43 +43,6 @@ def get_agentready_version() -> str:
         return get_version("agentready")
     except Exception:
         return "unknown"
-
-
-def create_all_assessors():
-    """Create all 25 assessors for assessment."""
-    assessors = [
-        # Tier 1 Essential (5 assessors)
-        CLAUDEmdAssessor(),
-        READMEAssessor(),
-        TypeAnnotationsAssessor(),
-        StandardLayoutAssessor(),
-        LockFilesAssessor(),
-        # Tier 2 Critical (10 assessors - 6 implemented, 4 stubs)
-        TestCoverageAssessor(),
-        PreCommitHooksAssessor(),
-        ConventionalCommitsAssessor(),
-        GitignoreAssessor(),
-        OneCommandSetupAssessor(),
-        SeparationOfConcernsAssessor(),
-        ConciseDocumentationAssessor(),
-        InlineDocumentationAssessor(),
-        CyclomaticComplexityAssessor(),  # Actually Tier 3, but including here
-        # Tier 3 Important (7 implemented)
-        ArchitectureDecisionsAssessor(),
-        IssuePRTemplatesAssessor(),
-        CICDPipelineVisibilityAssessor(),
-        SemanticNamingAssessor(),
-        StructuredLoggingAssessor(),
-        OpenAPISpecsAssessor(),
-        # Tier 4 Advanced (2 stubs)
-        BranchProtectionAssessor(),
-        CodeSmellsAssessor(),
-    ]
-
-    # Add remaining stub assessors
-    assessors.extend(create_stub_assessors())
-
-    return assessors
 
 
 @click.group(invoke_without_command=True)
@@ -313,130 +245,45 @@ def run_assessment(repository_path, verbose, output_dir, config_path):
 
 
 def load_config(config_path: Path) -> Config:
-    """Load configuration from YAML file with validation.
+    """Load configuration from YAML file with Pydantic validation.
 
-    Security: Validates YAML structure to prevent injection attacks
-    and malformed data from causing crashes or unexpected behavior.
+    Uses Pydantic for automatic validation, replacing 67 lines of manual
+    validation code with declarative field validators.
+
+    Security: Uses yaml.safe_load() for safe YAML parsing and Pydantic
+    validators for type checking and path sanitization.
+
+    Args:
+        config_path: Path to YAML configuration file
+
+    Returns:
+        Validated Config instance
+
+    Raises:
+        ValidationError: If YAML data doesn't match expected schema
+        FileNotFoundError: If config file doesn't exist
+        yaml.YAMLError: If YAML parsing fails
     """
     import yaml
 
-    with open(config_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
 
-    # Security: Validate data is a dict
-    if not isinstance(data, dict):
-        raise ValueError(
-            f"Config must be a YAML object/dict, got {type(data).__name__}"
-        )
+        # Pydantic handles all validation automatically
+        return Config.from_yaml_dict(data)
+    except ValidationError as e:
+        # Convert Pydantic validation errors to user-friendly messages
+        errors = []
+        for error in e.errors():
+            field = " → ".join(str(x) for x in error["loc"])
+            msg = error["msg"]
+            errors.append(f"  - {field}: {msg}")
 
-    # Security: Validate expected keys and reject unknown keys
-    allowed_keys = {
-        "weights",
-        "excluded_attributes",
-        "language_overrides",
-        "output_dir",
-        "report_theme",
-        "custom_theme",
-    }
-    unknown_keys = set(data.keys()) - allowed_keys
-    if unknown_keys:
-        raise ValueError(f"Unknown config keys: {', '.join(sorted(unknown_keys))}")
-
-    # Security: Validate weights is dict[str, float]
-    weights = data.get("weights", {})
-    if not isinstance(weights, dict):
-        raise ValueError(f"'weights' must be a dict, got {type(weights).__name__}")
-    for key, value in weights.items():
-        if not isinstance(key, str):
-            raise ValueError(f"Weight keys must be strings, got {type(key).__name__}")
-        if not isinstance(value, (int, float)):
-            raise ValueError(
-                f"Weight values must be numbers, got {type(value).__name__} for '{key}'"
-            )
-
-    # Security: Validate excluded_attributes is list[str]
-    excluded = data.get("excluded_attributes", [])
-    if not isinstance(excluded, list):
-        raise ValueError(
-            f"'excluded_attributes' must be a list, got {type(excluded).__name__}"
-        )
-    for item in excluded:
-        if not isinstance(item, str):
-            raise ValueError(
-                f"'excluded_attributes' items must be strings, got {type(item).__name__}"
-            )
-
-    # Security: Validate language_overrides is dict[str, list[str]]
-    lang_overrides = data.get("language_overrides", {})
-    if not isinstance(lang_overrides, dict):
-        raise ValueError(
-            f"'language_overrides' must be a dict, got {type(lang_overrides).__name__}"
-        )
-    for lang, patterns in lang_overrides.items():
-        if not isinstance(lang, str):
-            raise ValueError(
-                f"'language_overrides' keys must be strings, got {type(lang).__name__}"
-            )
-        if not isinstance(patterns, list):
-            raise ValueError(
-                f"'language_overrides' values must be lists, got {type(patterns).__name__}"
-            )
-        for pattern in patterns:
-            if not isinstance(pattern, str):
-                raise ValueError(
-                    f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
-                )
-
-    # Security: Validate and sanitize output_dir to prevent path traversal
-    output_dir = None
-    if "output_dir" in data:
-        output_dir_str = data["output_dir"]
-        if not isinstance(output_dir_str, str):
-            raise ValueError(
-                f"'output_dir' must be a string, got {type(output_dir_str).__name__}"
-            )
-
-        output_dir = Path(output_dir_str).resolve()
-
-        # Prevent absolute paths to system directories
-        sensitive_dirs = ["/etc", "/sys", "/proc", "/var", "/usr", "/bin", "/sbin"]
-        if any(str(output_dir).startswith(p) for p in sensitive_dirs):
-            raise ValueError(
-                f"'output_dir' cannot be in sensitive system directory: {output_dir}"
-            )
-
-    # Security: Validate report_theme is string
-    report_theme = data.get("report_theme", "default")
-    if not isinstance(report_theme, str):
-        raise ValueError(
-            f"'report_theme' must be a string, got {type(report_theme).__name__}"
-        )
-
-    # Security: Validate custom_theme is dict[str, str] if provided
-    custom_theme = data.get("custom_theme")
-    if custom_theme is not None:
-        if not isinstance(custom_theme, dict):
-            raise ValueError(
-                f"'custom_theme' must be a dict, got {type(custom_theme).__name__}"
-            )
-        for key, value in custom_theme.items():
-            if not isinstance(key, str):
-                raise ValueError(
-                    f"'custom_theme' keys must be strings, got {type(key).__name__}"
-                )
-            if not isinstance(value, str):
-                raise ValueError(
-                    f"'custom_theme' values must be strings, got {type(value).__name__}"
-                )
-
-    return Config(
-        weights=weights,
-        excluded_attributes=excluded,
-        language_overrides=lang_overrides,
-        output_dir=output_dir,
-        report_theme=report_theme,
-        custom_theme=custom_theme,
-    )
+        click.echo("Configuration validation failed:", err=True)
+        for error in errors:
+            click.echo(error, err=True)
+        sys.exit(1)
 
 
 @cli.command()
@@ -495,6 +342,7 @@ cli.add_command(assess_batch)
 cli.add_command(bootstrap)
 cli.add_command(demo)
 cli.add_command(experiment)
+cli.add_command(extract_skills)
 cli.add_command(learn)
 cli.add_command(migrate_report)
 cli.add_command(repomix_generate)

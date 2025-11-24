@@ -71,9 +71,9 @@ def sample_report(tmp_path):
 
 def test_validate_report_valid(runner, sample_report):
     """Test validate-report command with valid report."""
-    import importlib.util
-
-    if importlib.util.find_spec("jsonschema") is None:
+    try:
+        import jsonschema  # noqa: F401
+    except ImportError:
         pytest.skip("jsonschema not installed")
 
     result = runner.invoke(cli, ["validate-report", str(sample_report)])
@@ -84,9 +84,9 @@ def test_validate_report_valid(runner, sample_report):
 
 def test_validate_report_nonexistent(runner, tmp_path):
     """Test validate-report command with nonexistent file."""
-    import importlib.util
-
-    if importlib.util.find_spec("jsonschema") is None:
+    try:
+        import jsonschema  # noqa: F401
+    except ImportError:
         pytest.skip("jsonschema not installed")
 
     nonexistent = tmp_path / "nonexistent.json"
@@ -99,9 +99,9 @@ def test_validate_report_nonexistent(runner, tmp_path):
 
 def test_validate_report_invalid_json(runner, tmp_path):
     """Test validate-report command with invalid JSON."""
-    import importlib.util
-
-    if importlib.util.find_spec("jsonschema") is None:
+    try:
+        import jsonschema  # noqa: F401
+    except ImportError:
         pytest.skip("jsonschema not installed")
 
     invalid_file = tmp_path / "invalid.json"
@@ -116,9 +116,9 @@ def test_validate_report_invalid_json(runner, tmp_path):
 
 def test_validate_report_no_strict(runner, sample_report):
     """Test validate-report with --no-strict option."""
-    import importlib.util
-
-    if importlib.util.find_spec("jsonschema") is None:
+    try:
+        import jsonschema  # noqa: F401
+    except ImportError:
         pytest.skip("jsonschema not installed")
 
     result = runner.invoke(cli, ["validate-report", "--no-strict", str(sample_report)])
@@ -173,9 +173,9 @@ def test_migrate_report_unsupported_version(runner, sample_report):
 
 def test_validate_then_migrate_workflow(runner, sample_report, tmp_path):
     """Test full workflow: validate, migrate, validate again."""
-    import importlib.util
-
-    if importlib.util.find_spec("jsonschema") is None:
+    try:
+        import jsonschema  # noqa: F401
+    except ImportError:
         pytest.skip("jsonschema not installed")
 
     # Step 1: Validate original
