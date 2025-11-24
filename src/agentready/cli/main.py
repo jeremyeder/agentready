@@ -52,6 +52,7 @@ from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
 from ..services.research_loader import ResearchLoader
 from ..services.scanner import Scanner
+from ..utils.security import validate_config_dict, validate_path
 from ..utils.subprocess_utils import safe_subprocess_run
 from .align import align
 from .assess_batch import assess_batch
@@ -316,108 +317,44 @@ def load_config(config_path: Path) -> Config:
 
     Security: Validates YAML structure to prevent injection attacks
     and malformed data from causing crashes or unexpected behavior.
+    Uses centralized security utilities from utils.security module.
     """
     import yaml
 
     with open(config_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    # Security: Validate data is a dict
-    if not isinstance(data, dict):
-        raise ValueError(
-            f"Config must be a YAML object/dict, got {type(data).__name__}"
-        )
-
-    # Security: Validate expected keys and reject unknown keys
-    allowed_keys = {
-        "weights",
-        "excluded_attributes",
-        "language_overrides",
-        "output_dir",
-        "report_theme",
-        "custom_theme",
+    # Define config schema for validation
+    schema = {
+        "weights": {str: (int, float)},  # dict[str, int|float]
+        "excluded_attributes": [str],  # list[str]
+        "language_overrides": {
+            str: list
+        },  # dict[str, list] (nested list validated separately)
+        "output_dir": str,
+        "report_theme": str,
+        "custom_theme": dict,  # dict (nested types validated separately)
     }
-    unknown_keys = set(data.keys()) - allowed_keys
-    if unknown_keys:
-        raise ValueError(f"Unknown config keys: {', '.join(sorted(unknown_keys))}")
 
-    # Security: Validate weights is dict[str, float]
-    weights = data.get("weights", {})
-    if not isinstance(weights, dict):
-        raise ValueError(f"'weights' must be a dict, got {type(weights).__name__}")
-    for key, value in weights.items():
-        if not isinstance(key, str):
-            raise ValueError(f"Weight keys must be strings, got {type(key).__name__}")
-        if not isinstance(value, (int, float)):
-            raise ValueError(
-                f"Weight values must be numbers, got {type(value).__name__} for '{key}'"
-            )
+    # Validate config structure using centralized utility
+    validated = validate_config_dict(data, schema)
 
-    # Security: Validate excluded_attributes is list[str]
-    excluded = data.get("excluded_attributes", [])
-    if not isinstance(excluded, list):
-        raise ValueError(
-            f"'excluded_attributes' must be a list, got {type(excluded).__name__}"
-        )
-    for item in excluded:
-        if not isinstance(item, str):
-            raise ValueError(
-                f"'excluded_attributes' items must be strings, got {type(item).__name__}"
-            )
-
-    # Security: Validate language_overrides is dict[str, list[str]]
-    lang_overrides = data.get("language_overrides", {})
-    if not isinstance(lang_overrides, dict):
-        raise ValueError(
-            f"'language_overrides' must be a dict, got {type(lang_overrides).__name__}"
-        )
-    for lang, patterns in lang_overrides.items():
-        if not isinstance(lang, str):
-            raise ValueError(
-                f"'language_overrides' keys must be strings, got {type(lang).__name__}"
-            )
-        if not isinstance(patterns, list):
-            raise ValueError(
-                f"'language_overrides' values must be lists, got {type(patterns).__name__}"
-            )
-        for pattern in patterns:
-            if not isinstance(pattern, str):
+    # Additional nested validations for complex types
+    if "language_overrides" in validated:
+        lang_overrides = validated["language_overrides"]
+        for lang, patterns in lang_overrides.items():
+            if not isinstance(patterns, list):
                 raise ValueError(
-                    f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
+                    f"'language_overrides' values must be lists, got {type(patterns).__name__}"
                 )
+            for pattern in patterns:
+                if not isinstance(pattern, str):
+                    raise ValueError(
+                        f"'language_overrides' patterns must be strings, got {type(pattern).__name__}"
+                    )
 
-    # Security: Validate and sanitize output_dir to prevent path traversal
-    output_dir = None
-    if "output_dir" in data:
-        output_dir_str = data["output_dir"]
-        if not isinstance(output_dir_str, str):
-            raise ValueError(
-                f"'output_dir' must be a string, got {type(output_dir_str).__name__}"
-            )
-
-        output_dir = Path(output_dir_str).resolve()
-
-        # Prevent absolute paths to system directories
-        sensitive_dirs = ["/etc", "/sys", "/proc", "/var", "/usr", "/bin", "/sbin"]
-        if any(str(output_dir).startswith(p) for p in sensitive_dirs):
-            raise ValueError(
-                f"'output_dir' cannot be in sensitive system directory: {output_dir}"
-            )
-
-    # Security: Validate report_theme is string
-    report_theme = data.get("report_theme", "default")
-    if not isinstance(report_theme, str):
-        raise ValueError(
-            f"'report_theme' must be a string, got {type(report_theme).__name__}"
-        )
-
-    # Security: Validate custom_theme is dict[str, str] if provided
-    custom_theme = data.get("custom_theme")
-    if custom_theme is not None:
-        if not isinstance(custom_theme, dict):
-            raise ValueError(
-                f"'custom_theme' must be a dict, got {type(custom_theme).__name__}"
-            )
+    if "custom_theme" in validated:
+        custom_theme = validated["custom_theme"]
         for key, value in custom_theme.items():
             if not isinstance(key, str):
                 raise ValueError(
@@ -428,13 +365,20 @@ def load_config(config_path: Path) -> Config:
                     f"'custom_theme' values must be strings, got {type(value).__name__}"
                 )
 
+    # Validate and sanitize output_dir path
+    output_dir = None
+    if "output_dir" in validated:
+        output_dir = validate_path(
+            validated["output_dir"], allow_system_dirs=False, must_exist=False
+        )
+
     return Config(
-        weights=weights,
-        excluded_attributes=excluded,
-        language_overrides=lang_overrides,
+        weights=validated.get("weights", {}),
+        excluded_attributes=validated.get("excluded_attributes", []),
+        language_overrides=validated.get("language_overrides", {}),
         output_dir=output_dir,
-        report_theme=report_theme,
-        custom_theme=custom_theme,
+        report_theme=validated.get("report_theme", "default"),
+        custom_theme=validated.get("custom_theme"),
     )
 
 

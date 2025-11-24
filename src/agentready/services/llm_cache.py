@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from agentready.models import DiscoveredSkill
+from agentready.utils.security import validate_filename, validate_path
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ class LLMCache:
         """Validate cache key and return safe path.
 
         Security: Prevents path traversal attacks by validating cache_key
-        contains no directory separators and resolves within cache_dir.
+        using centralized security utilities.
 
         Args:
             cache_key: Cache key to validate
@@ -101,25 +102,20 @@ class LLMCache:
         Returns:
             Validated Path or None if invalid
         """
-        # Reject keys with path separators (/, \)
-        if "/" in cache_key or "\\" in cache_key:
-            return None
-
-        # Reject keys with null bytes or other dangerous characters
-        if "\0" in cache_key or ".." in cache_key:
-            return None
-
-        # Construct path and resolve to canonical form
-        cache_file = (self.cache_dir / f"{cache_key}.json").resolve()
-
-        # Ensure resolved path is within cache directory
+        # Validate filename using centralized utility
         try:
-            cache_file.relative_to(self.cache_dir.resolve())
+            validate_filename(cache_key, allow_path_separators=False)
         except ValueError:
-            # Path is outside cache_dir
             return None
 
-        return cache_file
+        # Construct cache file path
+        cache_file = self.cache_dir / f"{cache_key}.json"
+
+        # Validate path is within cache directory
+        try:
+            return validate_path(cache_file, base_dir=self.cache_dir, must_exist=False)
+        except ValueError:
+            return None
 
     @staticmethod
     def generate_key(attribute_id: str, score: float, evidence_hash: str) -> str:
