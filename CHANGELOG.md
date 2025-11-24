@@ -1,3 +1,10 @@
+# [2.7.0](https://github.com/ambient-code/agentready/compare/v2.6.0...v2.7.0) (2025-11-24)
+
+
+### Features
+
+* add interactive heatmap visualization for batch assessments ([#136](https://github.com/ambient-code/agentready/issues/136)) ([4d44fc3](https://github.com/ambient-code/agentready/commit/4d44fc3c6c47b775a371ae4b79c0a407445ee88c))
+
 # [2.6.0](https://github.com/ambient-code/agentready/compare/v2.5.0...v2.6.0) (2025-11-24)
 
 
