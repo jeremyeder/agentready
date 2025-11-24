@@ -20,7 +20,7 @@ class TestAssessmentCache:
         """Test that cache directory is created if it doesn't exist."""
         with TemporaryDirectory() as tmpdir:
             cache_dir = Path(tmpdir) / "deep" / "nested" / "cache"
-            cache = AssessmentCache(cache_dir)
+            AssessmentCache(cache_dir)
             assert cache_dir.exists()
 
     def test_get_cache_stats_empty(self):

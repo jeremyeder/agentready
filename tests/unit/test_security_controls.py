@@ -105,7 +105,7 @@ class TestSecurityControls:
             commit_hash = "abc123"
 
             # Should not crash or execute SQL
-            count = cache.invalidate(malicious_url, commit_hash)
+            cache.invalidate(malicious_url, commit_hash)
 
             # Verify table still exists by querying
             stats = cache.get_stats()

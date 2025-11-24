@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 try:
-    import jsonschema
+    import jsonschema  # noqa: F401
     from jsonschema import Draft7Validator, validators
 
     JSONSCHEMA_AVAILABLE = True

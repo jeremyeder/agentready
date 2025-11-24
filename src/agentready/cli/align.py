@@ -118,7 +118,9 @@ def align(repository, dry_run, attributes, interactive):
         attribute_list = [a.strip() for a in attributes.split(",")]
 
     fixer_service = FixerService()
-    fix_plan = fixer_service.generate_fix_plan(assessment, repo, attribute_list)
+    fix_plan = fixer_service.generate_fix_plan(
+        assessment, assessment.repository, attribute_list
+    )
 
     if not fix_plan.fixes:
         click.echo("\n✅ No automatic fixes available.")

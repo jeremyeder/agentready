@@ -415,7 +415,7 @@ def test_call_claude_api_builds_prompt(
     """Test that _call_claude_api builds correct prompt."""
     enricher = LLMEnricher(mock_anthropic_client, cache_dir=tmp_path)
 
-    result = enricher._call_claude_api(
+    enricher._call_claude_api(
         basic_skill, sample_finding, sample_repository, "code samples"
     )
 
