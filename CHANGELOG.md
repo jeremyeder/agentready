@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/ambient-code/agentready/compare/v2.2.0...v2.3.0) (2025-11-24)
+
+
+### Features
+
+* Standardize on Python 3.12+ with forward compatibility for 3.13 ([#132](https://github.com/ambient-code/agentready/issues/132)) ([84f2c46](https://github.com/ambient-code/agentready/commit/84f2c467eac64d0d0bd9b4189c0290325ae5933b))
+
 # [2.2.0](https://github.com/ambient-code/agentready/compare/v2.1.0...v2.2.0) (2025-11-24)
 
 
