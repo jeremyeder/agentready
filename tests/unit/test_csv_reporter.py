@@ -29,14 +29,17 @@ def temp_tsv_file(tmp_path):
 
 
 @pytest.fixture
-def mock_repository():
+def mock_repository(tmp_path):
     """Create a mock repository for testing."""
+    # Create a real temporary directory for the repository
+    repo_path = tmp_path / "test-repo"
+    repo_path.mkdir()
     return Repository(
-        path=Path("/test/repo"),
+        path=repo_path,
         name="test-repo",
+        url=None,
         branch="main",
         commit_hash="abc123def456",
-        primary_language="Python",
         languages={"Python": 10},
         total_files=100,
         total_lines=5000,
@@ -74,9 +77,9 @@ def mock_batch_assessment(mock_assessment):
     repo2 = Repository(
         path=Path("/test/repo2"),
         name="test-repo-2",
+        url=None,
         branch="main",
         commit_hash="def789abc123",
-        primary_language="JavaScript",
         languages={"JavaScript": 15},
         total_files=75,
         total_lines=3000,
@@ -297,9 +300,9 @@ class TestCSVReporter:
         repo = Repository(
             path=Path("/test"),
             name="test",
+            url=None,
             branch="main",
             commit_hash="abc123",
-            primary_language="Python",
             languages={},
             total_files=1,
             total_lines=1,
