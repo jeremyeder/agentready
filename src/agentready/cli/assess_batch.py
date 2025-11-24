@@ -249,6 +249,18 @@ def _generate_multi_reports(batch_assessment, output_path: Path, verbose: bool) 
     default=None,
     help="Custom cache directory (default: .agentready/cache/)",
 )
+@click.option(
+    "--generate-heatmap",
+    is_flag=True,
+    default=False,
+    help="Generate interactive Plotly heatmap visualization",
+)
+@click.option(
+    "--heatmap-output",
+    type=click.Path(),
+    default=None,
+    help="Custom path for heatmap HTML (default: reports-*/heatmap.html)",
+)
 def assess_batch(
     repos_file: Optional[str],
     repos: tuple,
@@ -260,6 +272,8 @@ def assess_batch(
     config: Optional[str],
     use_cache: bool,
     cache_dir: Optional[str],
+    generate_heatmap: bool,
+    heatmap_output: Optional[str],
 ):
     """Assess multiple repositories in a batch operation.
 
@@ -413,6 +427,30 @@ def assess_batch(
 
     # Generate comprehensive Phase 2 reports
     _generate_multi_reports(batch_assessment, output_path, verbose)
+
+    # Generate heatmap if requested
+    if generate_heatmap:
+        from ..services.attribute_analyzer import AttributeAnalyzer
+
+        timestamp = batch_assessment.timestamp.strftime("%Y%m%d-%H%M%S")
+        reports_dir = output_path / f"reports-{timestamp}"
+        heatmap_path = (
+            Path(heatmap_output) if heatmap_output else (reports_dir / "heatmap.html")
+        )
+
+        if verbose:
+            click.echo(f"\nGenerating heatmap visualization...")
+
+        try:
+            analyzer = AttributeAnalyzer()
+            analyzer.analyze_batch(batch_assessment, heatmap_path)
+            click.echo(f"  ✓ heatmap.html")
+        except Exception as e:
+            click.echo(f"⚠ Warning: Failed to generate heatmap: {e}", err=True)
+            if verbose:
+                import traceback
+
+                traceback.print_exc()
 
     # Print summary
     click.echo("\n" + "=" * 50)

@@ -565,15 +565,15 @@
                         <div class="heatmap-row-label">{{ result.assessment.repository.name }}</div>
                         {% for attr_item in batch_assessment.summary.top_failing_attributes[:10] %}
                             {% set attr_id = attr_item['attribute_id'] %}
-                            {% set finding = none %}
+                            {% set ns = namespace(finding=none) %}
                             {% for f in result.assessment.findings %}
                                 {% if f.attribute.id == attr_id %}
-                                    {% set finding = f %}
+                                    {% set ns.finding = f %}
                                 {% endif %}
                             {% endfor %}
-                            {% if finding %}
-                                {% set score = finding.score %}
-                                {% if finding.status == 'not_applicable' %}
+                            {% if ns.finding %}
+                                {% set score = ns.finding.score %}
+                                {% if ns.finding.status == 'not_applicable' %}
                                     {% set color = '#cccccc' %}
                                     {% set display = 'N/A' %}
                                     {% set text_color = '#333' %}

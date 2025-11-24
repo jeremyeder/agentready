@@ -152,7 +152,6 @@ class RepositoryManager:
                 "git",
                 "clone",
                 "--depth=1",  # Shallow clone for efficiency
-                "--no-hooks",  # Disable Git hooks
                 url,
                 str(target_dir),
             ]
