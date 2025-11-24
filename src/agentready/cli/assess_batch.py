@@ -7,6 +7,7 @@ from typing import Optional
 
 import click
 
+from ..assessors import create_all_assessors
 from ..models.config import Config
 from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
@@ -25,43 +26,6 @@ def _get_agentready_version() -> str:
         return get_version("agentready")
     except Exception:
         return "unknown"
-
-
-def _create_all_assessors():
-    """Create all 25 assessors for assessment."""
-    from ..assessors.code_quality import (
-        CyclomaticComplexityAssessor,
-        TypeAnnotationsAssessor,
-    )
-    from ..assessors.documentation import CLAUDEmdAssessor, READMEAssessor
-    from ..assessors.structure import StandardLayoutAssessor
-    from ..assessors.stub_assessors import (
-        ConventionalCommitsAssessor,
-        GitignoreAssessor,
-        LockFilesAssessor,
-        create_stub_assessors,
-    )
-    from ..assessors.testing import PreCommitHooksAssessor, TestCoverageAssessor
-
-    assessors = [
-        # Tier 1 Essential (5 assessors)
-        CLAUDEmdAssessor(),
-        READMEAssessor(),
-        TypeAnnotationsAssessor(),
-        StandardLayoutAssessor(),
-        LockFilesAssessor(),
-        # Tier 2 Critical (10 assessors - 3 implemented, 7 stubs)
-        TestCoverageAssessor(),
-        PreCommitHooksAssessor(),
-        ConventionalCommitsAssessor(),
-        GitignoreAssessor(),
-        CyclomaticComplexityAssessor(),
-    ]
-
-    # Add remaining stub assessors
-    assessors.extend(create_stub_assessors())
-
-    return assessors
 
 
 def _load_config(config_path: Path) -> Config:
@@ -441,7 +405,7 @@ def assess_batch(
     )
 
     # Create assessors
-    assessors = _create_all_assessors()
+    assessors = create_all_assessors()
 
     if verbose:
         click.echo(f"Assessors: {len(assessors)}")

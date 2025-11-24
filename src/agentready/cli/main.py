@@ -12,41 +12,7 @@ except ImportError:
     # Python 3.7 compatibility
     from importlib_metadata import version as get_version
 
-from ..assessors.code_quality import (
-    CodeSmellsAssessor,
-    CyclomaticComplexityAssessor,
-    SemanticNamingAssessor,
-    StructuredLoggingAssessor,
-    TypeAnnotationsAssessor,
-)
-
-# Import all assessors
-from ..assessors.documentation import (
-    ArchitectureDecisionsAssessor,
-    CLAUDEmdAssessor,
-    ConciseDocumentationAssessor,
-    InlineDocumentationAssessor,
-    OpenAPISpecsAssessor,
-    READMEAssessor,
-)
-from ..assessors.structure import (
-    IssuePRTemplatesAssessor,
-    OneCommandSetupAssessor,
-    SeparationOfConcernsAssessor,
-    StandardLayoutAssessor,
-)
-from ..assessors.stub_assessors import (
-    ConventionalCommitsAssessor,
-    GitignoreAssessor,
-    LockFilesAssessor,
-    create_stub_assessors,
-)
-from ..assessors.testing import (
-    BranchProtectionAssessor,
-    CICDPipelineVisibilityAssessor,
-    PreCommitHooksAssessor,
-    TestCoverageAssessor,
-)
+from ..assessors import create_all_assessors
 from ..models.config import Config
 from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
@@ -74,43 +40,6 @@ def get_agentready_version() -> str:
         return get_version("agentready")
     except Exception:
         return "unknown"
-
-
-def create_all_assessors():
-    """Create all 25 assessors for assessment."""
-    assessors = [
-        # Tier 1 Essential (5 assessors)
-        CLAUDEmdAssessor(),
-        READMEAssessor(),
-        TypeAnnotationsAssessor(),
-        StandardLayoutAssessor(),
-        LockFilesAssessor(),
-        # Tier 2 Critical (10 assessors - 6 implemented, 4 stubs)
-        TestCoverageAssessor(),
-        PreCommitHooksAssessor(),
-        ConventionalCommitsAssessor(),
-        GitignoreAssessor(),
-        OneCommandSetupAssessor(),
-        SeparationOfConcernsAssessor(),
-        ConciseDocumentationAssessor(),
-        InlineDocumentationAssessor(),
-        CyclomaticComplexityAssessor(),  # Actually Tier 3, but including here
-        # Tier 3 Important (7 implemented)
-        ArchitectureDecisionsAssessor(),
-        IssuePRTemplatesAssessor(),
-        CICDPipelineVisibilityAssessor(),
-        SemanticNamingAssessor(),
-        StructuredLoggingAssessor(),
-        OpenAPISpecsAssessor(),
-        # Tier 4 Advanced (2 stubs)
-        BranchProtectionAssessor(),
-        CodeSmellsAssessor(),
-    ]
-
-    # Add remaining stub assessors
-    assessors.extend(create_stub_assessors())
-
-    return assessors
 
 
 @click.group(invoke_without_command=True)
