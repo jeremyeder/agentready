@@ -312,7 +312,6 @@ class TestGitHubTokenSecurity:
         """Test that token never appears in logs."""
         from unittest.mock import patch
 
-
         from agentready.services.github_scanner import GitHubOrgScanner
 
         token = "ghp_" + "a" * 36
