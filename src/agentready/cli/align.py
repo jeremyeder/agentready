@@ -6,9 +6,7 @@ from pathlib import Path
 import click
 
 from ..models.config import Config
-from ..models.repository import Repository
 from ..services.fixer_service import FixerService
-from ..services.language_detector import LanguageDetector
 from ..services.scanner import Scanner
 
 
@@ -120,7 +118,9 @@ def align(repository, dry_run, attributes, interactive):
         attribute_list = [a.strip() for a in attributes.split(",")]
 
     fixer_service = FixerService()
-    fix_plan = fixer_service.generate_fix_plan(assessment, repo, attribute_list)
+    fix_plan = fixer_service.generate_fix_plan(
+        assessment, scanner.repository, attribute_list
+    )
 
     if not fix_plan.fixes:
         click.echo("\n✅ No automatic fixes available.")

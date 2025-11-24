@@ -11,7 +11,6 @@ from ..models.config import Config
 from ..reporters.html import HTMLReporter
 from ..reporters.markdown import MarkdownReporter
 from ..services.batch_scanner import BatchScanner
-from ..utils.subprocess_utils import safe_subprocess_run
 
 
 def _get_agentready_version() -> str:
@@ -152,9 +151,7 @@ def _load_config(config_path: Path) -> Config:
     )
 
 
-def _generate_multi_reports(
-    batch_assessment, output_path: Path, verbose: bool
-) -> None:
+def _generate_multi_reports(batch_assessment, output_path: Path, verbose: bool) -> None:
     """Generate all report formats in dated folder structure.
 
     Phase 2 Reporting:
@@ -170,10 +167,10 @@ def _generate_multi_reports(
         output_path: Base output directory
         verbose: Whether to show verbose progress
     """
-    from ..reporters.csv_reporter import CSVReporter
     from ..reporters.aggregated_json import AggregatedJSONReporter
-    from ..reporters.multi_html import MultiRepoHTMLReporter
+    from ..reporters.csv_reporter import CSVReporter
     from ..reporters.json_reporter import JSONReporter
+    from ..reporters.multi_html import MultiRepoHTMLReporter
 
     # Create dated reports folder
     timestamp = batch_assessment.timestamp.strftime("%Y%m%d-%H%M%S")
@@ -186,8 +183,12 @@ def _generate_multi_reports(
     # 1. CSV/TSV summary
     try:
         csv_reporter = CSVReporter()
-        csv_reporter.generate(batch_assessment, reports_dir / "summary.csv", delimiter=",")
-        csv_reporter.generate(batch_assessment, reports_dir / "summary.tsv", delimiter="\t")
+        csv_reporter.generate(
+            batch_assessment, reports_dir / "summary.csv", delimiter=","
+        )
+        csv_reporter.generate(
+            batch_assessment, reports_dir / "summary.tsv", delimiter="\t"
+        )
         if verbose:
             click.echo("  ✓ summary.csv")
             click.echo("  ✓ summary.tsv")
@@ -225,7 +226,9 @@ def _generate_multi_reports(
                 if verbose:
                     click.echo(f"  ✓ {base_name}.{{html,json,md}}")
             except Exception as e:
-                click.echo(f"  ✗ Individual reports failed for {base_name}: {e}", err=True)
+                click.echo(
+                    f"  ✗ Individual reports failed for {base_name}: {e}", err=True
+                )
 
     # 4. Multi-repo summary HTML (index)
     try:
@@ -259,12 +262,12 @@ def _generate_multi_reports(
 
     # Print final summary
     click.echo(f"\n✓ Reports generated: {reports_dir}/")
-    click.echo(f"  - index.html (summary)")
-    click.echo(f"  - summary.csv & summary.tsv")
-    click.echo(f"  - all-assessments.json")
-    click.echo(f"  - Individual reports per repository")
+    click.echo("  - index.html (summary)")
+    click.echo("  - summary.csv & summary.tsv")
+    click.echo("  - all-assessments.json")
+    click.echo("  - Individual reports per repository")
     if failed_results:
-        click.echo(f"  - failures.json")
+        click.echo("  - failures.json")
 
 
 @click.command()
@@ -573,7 +576,9 @@ def _generate_batch_markdown_report(batch_assessment, output_file: Path) -> None
         lines.append(f"\n### {result.repository_url}\n")
         if result.is_success():
             lines.append(f"- **Score**: {result.assessment.overall_score}/100\n")
-            lines.append(f"- **Certification**: {result.assessment.certification_level}\n")
+            lines.append(
+                f"- **Certification**: {result.assessment.certification_level}\n"
+            )
             lines.append(f"- **Duration**: {result.duration_seconds:.1f}s\n")
             lines.append(f"- **Cached**: {result.cached}\n")
         else:

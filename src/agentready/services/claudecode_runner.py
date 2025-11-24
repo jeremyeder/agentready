@@ -1,7 +1,7 @@
 """Claude Code headless mode execution wrapper."""
 
-import subprocess
 import json
+import subprocess
 from pathlib import Path
 from typing import Optional
 

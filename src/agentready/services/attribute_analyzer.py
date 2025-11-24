@@ -1,10 +1,11 @@
 """Attribute correlation analysis with Plotly Express heatmap."""
 
 import json
-import pandas as pd
-import plotly.express as px
 from pathlib import Path
 from typing import List
+
+import pandas as pd
+import plotly.express as px
 from scipy.stats import pearsonr
 
 
