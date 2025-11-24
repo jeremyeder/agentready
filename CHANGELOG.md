@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/ambient-code/agentready/compare/v2.4.0...v2.5.0) (2025-11-24)
+
+
+### Features
+
+* Batch Report Enhancements + Bootstrap Template Inheritance (Phase 2 Task 5) ([#133](https://github.com/ambient-code/agentready/issues/133)) ([7762b23](https://github.com/ambient-code/agentready/commit/7762b23ed7f8cd90fce56244c963ee2f887ee704))
+
 # [2.4.0](https://github.com/ambient-code/agentready/compare/v2.3.0...v2.4.0) (2025-11-24)
 
 
