@@ -254,7 +254,7 @@ class TestAssessCommand:
         """Test assess with custom config file."""
         # Create config file
         config_file = test_repo / "test-config.yaml"
-        config_file.write_text("weights:\n  claude_md_file: 2.0\n")
+        config_file.write_text("weights:\n  claude_md_file: 1.0\n")
 
         with patch("agentready.cli.main.Scanner") as mock_scanner_class:
             mock_scanner = MagicMock()
