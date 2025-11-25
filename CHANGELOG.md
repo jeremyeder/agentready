@@ -1,3 +1,10 @@
+## [2.8.1](https://github.com/ambient-code/agentready/compare/v2.8.0...v2.8.1) (2025-11-25)
+
+
+### Bug Fixes
+
+* add uv.lock to recognized lockfiles ([#143](https://github.com/ambient-code/agentready/issues/143)) ([a98dc87](https://github.com/ambient-code/agentready/commit/a98dc872f58e172ae7ec45f14d9dd13ea49869fe)), closes [#137](https://github.com/ambient-code/agentready/issues/137)
+
 # [2.8.0](https://github.com/ambient-code/agentready/compare/v2.7.1...v2.8.0) (2025-11-25)
 
 
