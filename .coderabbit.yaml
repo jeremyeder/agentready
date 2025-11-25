@@ -1,0 +1,156 @@
+# CodeRabbit Configuration for AgentReady
+# Only non-default values specified for maximum clarity
+# Full schema: https://coderabbit.ai/integrations/schema.v2.json
+
+# Disable poems (default: true)
+reviews:
+  poem: false
+
+  # Don't collapse walkthrough for visibility (default: false, keeping for clarity)
+  # collapse_walkthrough: false
+
+  # Request changes for critical issues (default: false)
+  request_changes_workflow: true
+
+  # Disable tools we run locally to reduce noise
+  tools:
+    # Python formatting/linting (we run locally before push)
+    ruff:
+      enabled: false  # default: true
+    flake8:
+      enabled: false  # default: true
+    pylint:
+      enabled: false  # default: true
+
+    # We don't use these technologies
+    biome:
+      enabled: false  # default: true (JS/TS tool, not applicable)
+
+  # Path-specific review instructions
+  path_instructions:
+    # Core assessors - enforce patterns
+    - path: "src/agentready/assessors/**"
+      instructions: |
+        - Verify BaseAssessor pattern compliance
+        - Check for proper error handling (return skipped/error, don't crash)
+        - Ensure proportional scoring using calculate_proportional_score()
+        - Validate attribute_id matches research report
+        - Check for graceful degradation when tools missing
+
+    # Data models - check for breaking changes
+    - path: "src/agentready/models/**"
+      instructions: |
+        - Check for breaking changes to data models
+        - Verify backwards compatibility
+        - Ensure schema version bumps when needed
+
+    # Services - security and performance focus
+    - path: "src/agentready/services/**"
+      instructions: |
+        - Check for proper error handling
+        - Verify performance implications (file I/O, subprocess calls)
+        - Look for security issues (path traversal, command injection)
+
+    # Tests - coverage and correctness only
+    - path: "tests/**"
+      instructions: |
+        - Verify test actually tests the intended behavior
+        - Check for missing edge cases
+        - Flag overly brittle tests (mocking too much)
+        - Skip all style comments
+
+    # CLI - UX and error messages
+    - path: "src/agentready/cli/**"
+      instructions: |
+        - Check for clear error messages
+        - Verify help text is accurate
+        - Look for missing error handling for user input
+
+    # GitHub Actions - security focus
+    - path: ".github/workflows/**"
+      instructions: |
+        - Check for secret exposure risks
+        - Verify proper permissions (least privilege)
+        - Flag outdated action versions (security)
+
+    # Documentation - critical issues only
+    - path: "**/*.md"
+      instructions: |
+        - Only comment on factual errors or broken links
+        - Skip formatting/style suggestions
+        - Flag outdated information (version mismatches, wrong commands)
+
+    # Scripts - security and robustness
+    - path: "scripts/**"
+      instructions: |
+        - Check for command injection vulnerabilities
+        - Verify error handling for subprocess calls
+        - Flag missing input validation
+
+  # Skip reviewing these paths entirely
+  path_filters:
+    - "!**/*.pyc"
+    - "!**/__pycache__/**"
+    - "!.venv/**"
+    - "!venv/**"
+    - "!htmlcov/**"
+    - "!.pytest_cache/**"
+    - "!.ruff_cache/**"
+    - "!*.egg-info/**"
+    - "!build/**"
+    - "!dist/**"
+    - "!.agentready/**"
+    - "!.cache/**"
+    - "!*.log"
+    - "!*.tmp"
+    - "!uv.lock"
+    - "!poetry.lock"
+    - "!package-lock.json"
+    - "!examples/**/*.json"
+    - "!examples/**/*.html"
+    - "!examples/**/*.md"
+
+# Teach CodeRabbit about AgentReady-specific patterns
+knowledge_base:
+  code_guidelines:
+    # Custom guidelines (default has empty array)
+    learnings:
+      - |
+        AgentReady assesses repositories against 25 agent-ready best practices.
+        Research report (agent-ready-codebase-attributes.md) defines these attributes.
+        All assessors must inherit from BaseAssessor and implement attribute_id and assess().
+
+      - |
+        We intentionally don't enforce line length (E501 ignored in ruff).
+        We use black for formatting with defaults.
+        Prefer explicit over clever, simple over complex.
+
+      - |
+        Error handling: Assessors return Finding.create_skipped() when tools missing, not crash.
+        Fail gracefully and provide actionable remediation guidance.
+
+      - |
+        Conventional commits (feat:, fix:, chore:, docs:, test:, refactor:).
+        All commits squashed before merge and signed with git signature.
+
+      - |
+        Target >80% test coverage on new code.
+        Tests focus on behavior, not implementation.
+        Mock external dependencies, don't over-mock internals.
+
+      - |
+        CLAUDE.md is source of truth for development.
+        README.md is user-facing.
+        All new features must update CLAUDE.md before merging.
+
+# Professional, concise tone (default: "")
+tone_instructions: |
+  - Be direct and concise - no fluff or pleasantries
+  - Focus on "why" not just "what" (explain the impact)
+  - Provide specific examples and code suggestions
+  - Link to documentation when relevant
+  - Don't repeat what the developer already knows
+  - Skip comments on anything already handled by automated tools
+  - Use "Consider" for suggestions, "This will" for bugs/issues
+  - No emoji, no enthusiasm, just facts
+  - If you're not 75%+ confident, don't comment
