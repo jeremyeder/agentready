@@ -28,6 +28,7 @@ from .structure import (
 )
 from .stub_assessors import (
     ConventionalCommitsAssessor,
+    FileSizeLimitsAssessor,
     GitignoreAssessor,
     LockFilesAssessor,
     create_stub_assessors,
@@ -58,12 +59,13 @@ def create_all_assessors() -> list[BaseAssessor]:
         TypeAnnotationsAssessor(),
         StandardLayoutAssessor(),
         LockFilesAssessor(),
-        # Tier 2 Critical (10 assessors - 6 implemented, 4 stubs)
+        # Tier 2 Critical (10 assessors - 7 implemented, 3 stubs)
         TestCoverageAssessor(),
         PreCommitHooksAssessor(),
         ConventionalCommitsAssessor(),
         GitignoreAssessor(),
         OneCommandSetupAssessor(),
+        FileSizeLimitsAssessor(),
         SeparationOfConcernsAssessor(),
         ConciseDocumentationAssessor(),
         InlineDocumentationAssessor(),
