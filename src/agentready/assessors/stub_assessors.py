@@ -221,6 +221,131 @@ class GitignoreAssessor(BaseAssessor):
             return Finding.error(self.attribute, reason="Could not read .gitignore")
 
 
+class FileSizeLimitsAssessor(BaseAssessor):
+    """Tier 2 - File size limits for context window optimization."""
+
+    @property
+    def attribute_id(self) -> str:
+        return "file_size_limits"
+
+    @property
+    def tier(self) -> int:
+        return 2
+
+    @property
+    def attribute(self) -> Attribute:
+        return Attribute(
+            id=self.attribute_id,
+            name="File Size Limits",
+            category="Context Window Optimization",
+            tier=self.tier,
+            description="Files are reasonably sized for AI context windows",
+            criteria="<5% of files >500 lines, no files >1000 lines",
+            default_weight=0.03,
+        )
+
+    def assess(self, repository: Repository) -> Finding:
+        """Check for excessively large files that strain context windows.
+
+        Scoring:
+        - 100: All files <500 lines
+        - 75-99: Some files 500-1000 lines
+        - 0-74: Files >1000 lines exist
+        """
+        # Count files by size
+        large_files = []  # 500-1000 lines
+        huge_files = []  # >1000 lines
+        total_files = 0
+
+        # Check common source file extensions
+        extensions = {".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".java", ".rb", ".rs", ".cpp", ".c", ".h"}
+
+        for ext in extensions:
+            pattern = f"**/*{ext}"
+            try:
+                from pathlib import Path
+                for file_path in repository.path.glob(pattern):
+                    if file_path.is_file():
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                lines = len(f.readlines())
+                                total_files += 1
+
+                                if lines > 1000:
+                                    huge_files.append((file_path.relative_to(repository.path), lines))
+                                elif lines > 500:
+                                    large_files.append((file_path.relative_to(repository.path), lines))
+                        except (OSError, UnicodeDecodeError):
+                            # Skip files we can't read
+                            pass
+            except Exception:
+                pass
+
+        if total_files == 0:
+            return Finding.not_applicable(
+                self.attribute,
+                reason="No source files found to assess",
+            )
+
+        # Calculate score
+        if huge_files:
+            # Penalty for files >1000 lines
+            percentage_huge = (len(huge_files) / total_files) * 100
+            score = max(0, 70 - (percentage_huge * 10))
+            status = "fail"
+            evidence = [
+                f"Found {len(huge_files)} files >1000 lines ({percentage_huge:.1f}% of {total_files} files)",
+                f"Largest: {huge_files[0][0]} ({huge_files[0][1]} lines)",
+            ]
+        elif large_files:
+            # Partial credit for files 500-1000 lines
+            percentage_large = (len(large_files) / total_files) * 100
+            if percentage_large < 5:
+                score = 90
+                status = "pass"
+            else:
+                score = max(75, 100 - (percentage_large * 5))
+                status = "pass"
+
+            evidence = [
+                f"Found {len(large_files)} files 500-1000 lines ({percentage_large:.1f}% of {total_files} files)",
+            ]
+        else:
+            # Perfect score
+            score = 100.0
+            status = "pass"
+            evidence = [f"All {total_files} source files are <500 lines"]
+
+        return Finding(
+            attribute=self.attribute,
+            status=status,
+            score=score,
+            measured_value=f"{len(huge_files)} huge, {len(large_files)} large out of {total_files}",
+            threshold="<5% files >500 lines, 0 files >1000 lines",
+            evidence=evidence,
+            remediation=(
+                None
+                if status == "pass"
+                else Remediation(
+                    summary="Refactor large files into smaller, focused modules",
+                    steps=[
+                        "Identify files >1000 lines",
+                        "Split into logical submodules",
+                        "Extract classes/functions into separate files",
+                        "Maintain single responsibility principle",
+                    ],
+                    tools=["refactoring tools", "linters"],
+                    commands=[],
+                    examples=[
+                        "# Split large file:\n# models.py (1500 lines) → models/user.py, models/product.py, models/order.py"
+                    ],
+                    citations=[],
+                )
+            ),
+            error_message=None,
+        )
+
+
 # Create stub assessors for remaining attributes
 # These return "not_applicable" for now but can be enhanced later
 
@@ -270,20 +395,6 @@ def create_stub_assessors():
     return [
         # Tier 2 Critical
         StubAssessor(
-            "one_command_setup",
-            "One-Command Build/Setup",
-            "Build & Development",
-            2,
-            0.03,
-        ),
-        StubAssessor(
-            "file_size_limits",
-            "File Size Limits",
-            "Context Window Optimization",
-            2,
-            0.03,
-        ),
-        StubAssessor(
             "dependency_freshness",
             "Dependency Freshness & Security",
             "Dependency Management",
@@ -317,7 +428,7 @@ def create_stub_assessors():
             "Issue & Pull Request Templates",
             "Git & Version Control",
             4,
-            0.01,
+            0.01
         ),
         StubAssessor(
             "container_setup",
