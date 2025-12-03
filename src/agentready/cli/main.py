@@ -31,6 +31,7 @@ from .learn import learn
 from .repomix import repomix_generate
 from .research import research
 from .schema import migrate_report, validate_report
+from .submit import submit
 
 
 def get_agentready_version() -> str:
@@ -347,6 +348,7 @@ cli.add_command(learn)
 cli.add_command(migrate_report)
 cli.add_command(repomix_generate)
 cli.add_command(research)
+cli.add_command(submit)
 cli.add_command(validate_report)
 
 
