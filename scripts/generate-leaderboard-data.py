@@ -81,6 +81,11 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
         latest = submissions[0]["assessment"]
 
         try:
+            # Extract version information from metadata
+            metadata = latest.get("metadata", {})
+            agentready_version = metadata.get("agentready_version", "unknown")
+            research_version = metadata.get("research_version", "unknown")
+
             entry = {
                 "repo": repo_name,
                 "org": repo_name.split("/")[0],
@@ -91,10 +96,18 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
                 "size": latest["repository"].get("size_category", "Unknown"),
                 "last_updated": submissions[0]["timestamp"][:10],  # YYYY-MM-DD
                 "url": latest["repository"]["url"],
+                "agentready_version": agentready_version,
+                "research_version": research_version,
                 "history": [
                     {
                         "date": s["timestamp"][:10],
                         "score": float(s["assessment"]["overall_score"]),
+                        "agentready_version": s["assessment"]
+                        .get("metadata", {})
+                        .get("agentready_version", "unknown"),
+                        "research_version": s["assessment"]
+                        .get("metadata", {})
+                        .get("research_version", "unknown"),
                     }
                     for s in submissions
                 ],

@@ -13,6 +13,7 @@ from ..models.finding import Finding
 from ..models.metadata import AssessmentMetadata
 from ..models.repository import Repository
 from .language_detector import LanguageDetector
+from .research_loader import ResearchLoader
 from .scorer import Scorer
 
 
@@ -123,8 +124,19 @@ class Scanner:
             # Reconstruct command from sys.argv
             command = " ".join(sys.argv)
 
+        # Load research version
+        research_loader = ResearchLoader()
+        try:
+            _, research_metadata, _, _, _ = research_loader.load_and_validate()
+            research_version = research_metadata.version
+        except Exception:
+            research_version = "unknown"
+
         metadata = AssessmentMetadata.create(
-            version=version, timestamp=timestamp, command=command
+            version=version,
+            research_version=research_version,
+            timestamp=timestamp,
+            command=command,
         )
 
         if verbose:

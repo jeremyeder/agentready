@@ -44,10 +44,12 @@ jobs:
           REPO_URL=$(jq -r '.repository.url' "$CHANGED_FILE")
           CLAIMED_SCORE=$(jq -r '.overall_score' "$CHANGED_FILE")
           REPO_NAME=$(jq -r '.repository.name' "$CHANGED_FILE")
+          RESEARCH_VERSION=$(jq -r '.metadata.research_version // "unknown"' "$CHANGED_FILE")
 
           echo "repo_url=$REPO_URL" >> $GITHUB_OUTPUT
           echo "claimed_score=$CLAIMED_SCORE" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "research_version=$RESEARCH_VERSION" >> $GITHUB_OUTPUT
 
       - name: Validate JSON schema
         env:
@@ -123,24 +125,36 @@ jobs:
           echo "Running assessment..."
           agentready assess /tmp/repo-to-assess --output-dir /tmp/validation
 
-          # Extract actual score
+          # Extract actual score and version
           ACTUAL_SCORE=$(jq -r '.overall_score' /tmp/validation/assessment-latest.json)
+          ACTUAL_RESEARCH_VERSION=$(jq -r '.metadata.research_version // "unknown"' /tmp/validation/assessment-latest.json)
+
           echo "ACTUAL_SCORE=$ACTUAL_SCORE" >> $GITHUB_ENV
-          echo "Actual score: $ACTUAL_SCORE"
+          echo "ACTUAL_RESEARCH_VERSION=$ACTUAL_RESEARCH_VERSION" >> $GITHUB_ENV
+          echo "Actual score: $ACTUAL_SCORE (ruleset: $ACTUAL_RESEARCH_VERSION)"
 
       - name: Compare scores
         env:
           CLAIMED_SCORE: ${{ steps.extract.outputs.claimed_score }}
+          CLAIMED_RESEARCH_VERSION: ${{ steps.extract.outputs.research_version }}
         run: |
           CLAIMED=$CLAIMED_SCORE
           ACTUAL=$ACTUAL_SCORE
+          CLAIMED_VERSION=$CLAIMED_RESEARCH_VERSION
+          ACTUAL_VERSION=$ACTUAL_RESEARCH_VERSION
 
           # Calculate absolute difference
           DIFF=$(echo "scale=2; if ($ACTUAL - $CLAIMED < 0) $CLAIMED - $ACTUAL else $ACTUAL - $CLAIMED" | bc)
 
-          echo "Claimed score: $CLAIMED"
-          echo "Actual score: $ACTUAL"
+          echo "Claimed score: $CLAIMED (ruleset: $CLAIMED_VERSION)"
+          echo "Actual score: $ACTUAL (ruleset: $ACTUAL_VERSION)"
           echo "Difference: $DIFF"
+
+          # Warn if research versions differ
+          if [ "$CLAIMED_VERSION" != "$ACTUAL_VERSION" ]; then
+            echo "::warning::Research version mismatch! Claimed: $CLAIMED_VERSION, Actual: $ACTUAL_VERSION"
+            echo "::warning::Scores may not be directly comparable across different rulesets."
+          fi
 
           # Allow ±2 point tolerance
           if (( $(echo "$DIFF > 2" | bc -l) )); then
@@ -158,11 +172,15 @@ jobs:
           CLAIMED_SCORE: ${{ steps.extract.outputs.claimed_score }}
           ACTUAL_SCORE: ${{ env.ACTUAL_SCORE }}
           REPO_NAME: ${{ steps.extract.outputs.repo_name }}
+          CLAIMED_RESEARCH_VERSION: ${{ steps.extract.outputs.research_version }}
+          ACTUAL_RESEARCH_VERSION: ${{ env.ACTUAL_RESEARCH_VERSION }}
         with:
           script: |
             const claimed = process.env.CLAIMED_SCORE || 'N/A';
             const actual = process.env.ACTUAL_SCORE || 'N/A';
             const repoName = process.env.REPO_NAME || 'unknown';
+            const claimedVersion = process.env.CLAIMED_RESEARCH_VERSION || 'unknown';
+            const actualVersion = process.env.ACTUAL_RESEARCH_VERSION || 'unknown';
 
             let diff = 'N/A';
             let status = '❌ **FAILED**';
@@ -181,20 +199,23 @@ jobs:
             }
 
             const checkMark = parseFloat(diff) <= 2.0 ? '✅' : '❌';
+            const versionMismatch = claimedVersion !== actualVersion;
+            const versionWarning = versionMismatch ? '\n\n⚠️ **Warning**: Research version mismatch! Claimed: `' + claimedVersion + '`, Actual: `' + actualVersion + '`. Scores may not be directly comparable across different rulesets.' : '';
             const finalMessage = status.includes('PASSED') ? '**This submission is ready for merge!**' : '**Please review the workflow logs for error details.**';
 
             const body = '## Validation Results\n\n' +
-              status + ' - ' + message + '\n\n' +
+              status + ' - ' + message + versionWarning + '\n\n' +
               '### Scores\n\n' +
-              '- **Claimed**: ' + claimed + '/100\n' +
-              '- **Verified**: ' + actual + '/100\n' +
+              '- **Claimed**: ' + claimed + '/100 (ruleset: `' + claimedVersion + '`)\n' +
+              '- **Verified**: ' + actual + '/100 (ruleset: `' + actualVersion + '`)\n' +
               '- **Difference**: ' + diff + ' points\n' +
               '- **Tolerance**: ±2 points\n\n' +
               '### Checks\n\n' +
               '- ✅ JSON schema valid\n' +
               '- ✅ Repository is public\n' +
               '- ✅ Submitter has commit access\n' +
-              '- ' + checkMark + ' Score verification passed\n\n' +
+              '- ' + checkMark + ' Score verification passed\n' +
+              '- ' + (versionMismatch ? '⚠️' : '✅') + ' Research version check\n\n' +
               finalMessage + '\n\n' +
               '---\n\n' +
               '*Automated validation by [AgentReady Leaderboard](https://github.com/agentready/agentready)*';

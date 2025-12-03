@@ -16,6 +16,7 @@ class AssessmentMetadata:
 
     Attributes:
         agentready_version: Version of AgentReady used (e.g., "1.0.0")
+        research_version: Version of research report/ruleset (e.g., "1.2.0")
         assessment_timestamp: ISO 8601 timestamp of when assessment started
         assessment_timestamp_human: Human-readable timestamp (e.g., "November 21, 2025 at 2:11 AM")
         executed_by: Username and hostname (e.g., "jeder@macbook")
@@ -24,6 +25,7 @@ class AssessmentMetadata:
     """
 
     agentready_version: str
+    research_version: str
     assessment_timestamp: str  # ISO 8601 format
     assessment_timestamp_human: str
     executed_by: str
@@ -34,6 +36,7 @@ class AssessmentMetadata:
         """Convert to dictionary for JSON serialization."""
         return {
             "agentready_version": self.agentready_version,
+            "research_version": self.research_version,
             "assessment_timestamp": self.assessment_timestamp,
             "assessment_timestamp_human": self.assessment_timestamp_human,
             "executed_by": self.executed_by,
@@ -43,12 +46,13 @@ class AssessmentMetadata:
 
     @classmethod
     def create(
-        cls, version: str, timestamp: datetime, command: str
+        cls, version: str, research_version: str, timestamp: datetime, command: str
     ) -> "AssessmentMetadata":
         """Create metadata from execution context.
 
         Args:
             version: AgentReady version string
+            research_version: Research report version string
             timestamp: Assessment start time
             command: CLI command executed
 
@@ -80,6 +84,7 @@ class AssessmentMetadata:
 
         return cls(
             agentready_version=version,
+            research_version=research_version,
             assessment_timestamp=iso_timestamp,
             assessment_timestamp_human=human_timestamp,
             executed_by=executed_by,

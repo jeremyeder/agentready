@@ -59,6 +59,7 @@ agentready submit
       <th>Repository</th>
       <th>Score</th>
       <th>Tier</th>
+      <th>Ruleset</th>
       <th>Language</th>
       <th>Size</th>
       <th>Last Updated</th>
@@ -75,6 +76,7 @@ agentready submit
       <td>
         <span class="badge {{ entry.tier | downcase }}">{{ entry.tier }}</span>
       </td>
+      <td class="version">{{ entry.research_version }}</td>
       <td>{{ entry.language }}</td>
       <td>{{ entry.size }}</td>
       <td>{{ entry.last_updated }}</td>
