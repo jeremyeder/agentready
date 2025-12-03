@@ -10,9 +10,9 @@ import json
 import os
 import re
 import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import anthropic
 import yaml
@@ -55,13 +55,11 @@ class ResearchUpdater:
         Returns:
             List of search results with title, url, snippet, date
         """
-        search_queries = [
-            f"{attribute_name} AI assisted development best practices 2025",
-            f"{attribute_name} Claude Code LLM agents",
-            f"{attribute_name} codebase optimization AI tools",
-        ]
-
         # Placeholder: In production, execute actual web searches
+        # Example search queries would be:
+        # - f"{attribute_name} AI assisted development best practices 2025"
+        # - f"{attribute_name} Claude Code LLM agents"
+        # - f"{attribute_name} codebase optimization AI tools"
         # For now, we'll use Claude to generate hypothetical recent research
         results = []
 

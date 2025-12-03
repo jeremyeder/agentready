@@ -277,7 +277,6 @@ class FileSizeLimitsAssessor(BaseAssessor):
         for ext in extensions:
             pattern = f"**/*{ext}"
             try:
-                from pathlib import Path
 
                 for file_path in repository.path.glob(pattern):
                     if file_path.is_file():
