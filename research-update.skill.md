@@ -73,6 +73,7 @@ dependencies:
 - Filter for Claude Code and AI-assisted development context
 
 **Citation Format**:
+
 ```markdown
 **Citations:**
 - [Paper Title](https://url.com) - Author/Source, Date
@@ -616,11 +617,13 @@ Before merging the automated PR:
 ## Example Output
 
 ### Pull Request Title
-```
+
+```text
 Weekly Research Update: Agent-Ready Codebase Attributes
 ```
 
 ### Pull Request Body
+
 ```markdown
 ## Automated Research Update
 

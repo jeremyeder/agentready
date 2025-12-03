@@ -9,9 +9,10 @@ and proposes updates with citations.
 import os
 import re
 import json
+import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import anthropic
 import yaml
@@ -21,9 +22,19 @@ class ResearchUpdater:
     """Manages research report updates with LLM-powered analysis."""
 
     def __init__(self, config_path: str = "scripts/research_config.yaml"):
+        config_file = Path(config_path)
+        if not config_file.exists():
+            raise FileNotFoundError(f"Config file not found: {config_path}")
         self.config = self._load_config(config_path)
-        self.client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY environment variable is required")
+        self.client = anthropic.Anthropic(api_key=api_key)
+
         self.report_path = Path("agent-ready-codebase-attributes.md")
+        if not self.report_path.exists():
+            raise FileNotFoundError(f"Report file not found: {self.report_path}")
         self.changes_made = []
 
     def _load_config(self, path: str) -> dict:
@@ -91,7 +102,7 @@ Format as JSON array."""
         attribute_id: str,
         search_results: List[Dict[str, str]],
         current_content: str,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Use Claude API to analyze search results and determine relevance.
 
@@ -163,7 +174,7 @@ OUTPUT FORMAT (JSON):
             }
 
     def update_attribute_section(
-        self, attribute_id: str, analysis_result: Dict[str, any]
+        self, attribute_id: str, analysis_result: Dict[str, Any]
     ) -> bool:
         """
         Update the attribute section in the research report.
@@ -262,14 +273,27 @@ OUTPUT FORMAT (JSON):
         return True
 
     def _format_citations(self, citations: List[Dict[str, str]]) -> str:
-        """Format citations in markdown."""
+        """Format citations in markdown with URL validation."""
         lines = []
         for cite in citations:
             title = cite.get("title", "Untitled")
             url = cite.get("url", "")
+
+            # Validate URL
+            if url:
+                parsed = urllib.parse.urlparse(url)
+                if not parsed.scheme or not parsed.netloc:
+                    print(f"  Warning: Skipping invalid URL: {url}")
+                    continue
+
+                # Check against blocked domains
+                blocked = self.config.get("search_domains", {}).get("blocked", [])
+                if any(domain in parsed.netloc for domain in blocked):
+                    print(f"  Warning: Skipping blocked domain: {url}")
+                    continue
+
             authors = cite.get("authors", "Unknown")
             date = cite.get("date", "")
-
             lines.append(f"- [{title}]({url}) - {authors}, {date}")
 
         return "\n".join(lines)

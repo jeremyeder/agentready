@@ -28,16 +28,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install anthropic requests python-dotenv pyyaml
+          pip install -r scripts/requirements.txt
 
       - name: Run research update script
+        id: research
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/update_research.py
+          python scripts/update_research.py || echo "changes_made=false" >> "$GITHUB_OUTPUT"
+          echo "changes_made=true" >> "$GITHUB_OUTPUT"
 
       - name: Create Pull Request
+        if: steps.research.outputs.changes_made == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

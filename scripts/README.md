@@ -51,11 +51,13 @@ python -c "import yaml; print(yaml.safe_load(open('scripts/research_config.yaml'
 The workflow runs automatically every Monday at 9 AM UTC.
 
 **Manual trigger**:
+
 ```bash
 gh workflow run research-update.yml
 ```
 
 **View recent runs**:
+
 ```bash
 gh run list --workflow=research-update.yml
 ```
