@@ -330,6 +330,7 @@ class TestAssessmentMetadata:
         timestamp = datetime(2025, 11, 21, 2, 11, 5)
         metadata = AssessmentMetadata.create(
             version="1.0.0",
+            research_version="1.2.0",
             timestamp=timestamp,
             command="agentready assess . --verbose",
         )
@@ -345,7 +346,10 @@ class TestAssessmentMetadata:
         """Test metadata serialization."""
         timestamp = datetime(2025, 11, 21, 2, 11, 5)
         metadata = AssessmentMetadata.create(
-            version="1.0.0", timestamp=timestamp, command="agentready assess ."
+            version="1.0.0",
+            research_version="1.2.0",
+            timestamp=timestamp,
+            command="agentready assess .",
         )
 
         data = metadata.to_dict()
@@ -360,6 +364,7 @@ class TestAssessmentMetadata:
         """Test manually creating metadata with all fields."""
         metadata = AssessmentMetadata(
             agentready_version="1.2.3",
+            research_version="1.2.0",
             assessment_timestamp="2025-11-21T02:11:05",
             assessment_timestamp_human="November 21, 2025 at 2:11 AM",
             executed_by="testuser@testhost",
@@ -389,7 +394,10 @@ class TestAssessmentMetadata:
 
         timestamp = datetime.now()
         metadata = AssessmentMetadata.create(
-            version="1.0.0", timestamp=timestamp, command="agentready assess ."
+            version="1.0.0",
+            research_version="1.2.0",
+            timestamp=timestamp,
+            command="agentready assess .",
         )
 
         attr = Attribute(

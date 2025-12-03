@@ -275,8 +275,16 @@ class MarkdownReporter(BaseReporter):
 
     def _generate_footer(self, assessment: Assessment) -> str:
         """Generate report footer."""
-        agentready_version = assessment.metadata.agentready_version
-        research_version = assessment.metadata.research_version
+        if assessment.metadata:
+            agentready_version = assessment.metadata.agentready_version
+            research_version = assessment.metadata.research_version
+            executed_by = assessment.metadata.executed_by
+            timestamp_human = assessment.metadata.assessment_timestamp_human
+        else:
+            agentready_version = "unknown"
+            research_version = "unknown"
+            executed_by = "unknown"
+            timestamp_human = assessment.timestamp.strftime("%B %d, %Y at %H:%M")
 
         return f"""---
 
@@ -286,7 +294,7 @@ class MarkdownReporter(BaseReporter):
 - **Research Version**: v{research_version}
 - **Repository Snapshot**: {assessment.repository.commit_hash}
 - **Assessment Duration**: {assessment.duration_seconds:.1f}s
-- **Assessed By**: {assessment.metadata.executed_by}
-- **Assessment Date**: {assessment.metadata.assessment_timestamp_human}
+- **Assessed By**: {executed_by}
+- **Assessment Date**: {timestamp_human}
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)"""
