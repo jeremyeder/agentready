@@ -6,9 +6,9 @@ Searches for recent research, analyzes relevance using Claude API,
 and proposes updates with citations.
 """
 
+import json
 import os
 import re
-import json
 import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
