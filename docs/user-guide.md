@@ -11,13 +11,9 @@ Complete guide to installing, configuring, and using AgentReady to assess your r
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Bootstrap Your Repository](#bootstrap-your-repository) ⭐ **NEW**
-  - [What is Bootstrap?](#what-is-bootstrap)
-  - [When to Use Bootstrap vs Assess](#when-to-use-bootstrap-vs-assess)
-  - [Step-by-Step Tutorial](#step-by-step-tutorial)
-  - [Generated Files Explained](#generated-files-explained)
-  - [Post-Bootstrap Checklist](#post-bootstrap-checklist)
+- [Bootstrap Your Repository](#bootstrap-your-repository) ⭐ **NEW** - [What is Bootstrap?](#what-is-bootstrap) | [When to Use Bootstrap vs Assess](#when-to-use-bootstrap-vs-assess)
 - [Running Assessments](#running-assessments)
+- [Batch Assessment](#batch-assessment)
 - [Understanding Reports](#understanding-reports)
 - [Configuration](#configuration)
 - [CLI Reference](#cli-reference)
