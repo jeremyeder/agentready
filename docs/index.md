@@ -265,16 +265,22 @@ Every attribute includes specific citations and measurable criteria. No subjecti
   </div>
 </div>
 
-## What Users Are Saying
+## What The AI Hype Cycle Taught Us
 
-> "Running AgentReady on our codebase identified 5 quick wins that immediately improved Claude Code's suggestions. The actionable remediation made it easy to implement changes in under an hour."
-> — *Engineering Team Lead*
+> "We spent $200M on an LLM coding assistant only to discover it couldn't read our 8-year-old Java monolith with no README. Turns out 'AI can code' still requires, like, documentation."
+> — *VP of Engineering, Definitely Not Learning The Hard Way*
 
-> "The research backing each attribute gave me confidence these weren't arbitrary rules. Every recommendation is cited and measurable."
-> — *Principal Engineer*
+> "Our AI pair programmer kept hallucinating imports from packages that don't exist. Running AgentReady revealed we had zero type annotations. The AI was just... guessing. It was guessing the whole time."
+> — *Senior Developer, Suddenly Understanding Why Tests Matter*
 
-> "We use AgentReady in CI to prevent regression. It's become part of our definition of done for new features."
-> — *DevOps Engineer*
+> "Spent 6 months telling leadership 'AI will replace developers' then spent the next 6 months explaining why our codebase needs conventional commits, issue templates, and a CLAUDE.md file. The robots need babysitting, it turns out."
+> — *CTO, Reformed AI Maximalist*
+
+> "We tried to skip documentation because 'the AI can figure it out.' Narrator: *The AI could not figure it out.* AgentReady's 80/100 score was a wake-up call that maybe, just maybe, basic engineering hygiene still matters in 2025."
+> — *Tech Lead, Back to Reading The Manual*
+
+> "I ran AgentReady expecting it to tell me my code was perfect. Instead it created a singularity of technical debt that collapsed into a black hole of missing README files, zero test coverage, and 47 TODO comments from 2019. Thanks, Claude!"
+> — *Developer, Now Confronting Reality*
 
 ## Ready to Get Started?
 
