@@ -362,11 +362,11 @@ Bootstrap automates infrastructure generation through template rendering and lan
 
 ## Creating Bootstrap Templates
 
-Bootstrap templates are Jinja2 files in `templates/bootstrap/` with language-specific subdirectories (python/, javascript/, go/) and common/ for shared templates. Templates use variables like `{{ python_version }}`, `{{ repository_name }}`, `{{ year }}`, and conditionals for language-specific logic (`{% if language == "python" %}...{% endif %}`).
+Bootstrap templates are Jinja2 files in `templates/bootstrap/` with language-specific subdirectories (python/, javascript/, go/) and common/ for shared templates. Templates use variables like `{% raw %}{{ python_version }}{% endraw %}`, `{% raw %}{{ repository_name }}{% endraw %}`, `{% raw %}{{ year }}{% endraw %}`, and conditionals for language-specific logic (`{% raw %}{% if language == "python" %}...{% endif %}{% endraw %}`).
 
 **Development workflow**: Create template file (e.g., `python/mytemplate.yml.j2`), add Jinja2 variables and conditionals, register in BootstrapGenerator's TEMPLATES dict, test with `agentready bootstrap . --dry-run`, verify output.
 
-**Best practices**: Use descriptive variable names (`{{ python_version }}` not `{{ ver }}`), provide defaults (`{{ python_version | default("3.11") }}`), add generation metadata comments, handle optional sections with conditionals (`{% if has_tests_directory %}`), include context about template purpose.
+**Best practices**: Use descriptive variable names (`{% raw %}{{ python_version }}{% endraw %}` not `{% raw %}{{ ver }}{% endraw %}`), provide defaults (`{% raw %}{{ python_version | default("3.11") }}{% endraw %}`), add generation metadata comments, handle optional sections with conditionals (`{% raw %}{% if has_tests_directory %}{% endraw %}`), include context about template purpose.
 
 ---
 
