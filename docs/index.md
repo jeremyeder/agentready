@@ -340,22 +340,25 @@ Every attribute includes specific citations and measurable criteria. No subjecti
   </div>
 </div>
 
-## What The AI Hype Cycle Taught Us
+## What The AI Bubble Taught Us
 
-> "We spent $200M on an LLM coding assistant only to discover it couldn't read our 8-year-old Java monolith with no README. Turns out 'AI can code' still requires, like, documentation."
-> — *VP of Engineering, Definitely Not Learning The Hard Way*
+> "Fired all our junior developers because 'AI can code now,' then spent $2M on GitHub Copilot Enterprise only to discover it works better with... documentation? And tests? Turns out you can't replace humans with spicy autocomplete and vibes."
+> — *CTO, Currently Rehiring*
 
-> "Our AI pair programmer kept hallucinating imports from packages that don't exist. Running AgentReady revealed we had zero type annotations. The AI was just... guessing. It was guessing the whole time."
-> — *Senior Developer, Suddenly Understanding Why Tests Matter*
+> "My AI coding assistant told me it was 'very confident' about a solution that would have deleted production. Running AgentReady revealed our codebase has the readability of a ransom note. The AI was confident because it had no idea what it was doing. Just like us!"
+> — *Senior Developer, Trust Issues Intensifying*
 
-> "Spent 6 months telling leadership 'AI will replace developers' then spent the next 6 months explaining why our codebase needs conventional commits, issue templates, and a CLAUDE.md file. The robots need babysitting, it turns out."
-> — *CTO, Reformed AI Maximalist*
+> "We added 'AI-driven development' to the Series B deck before checking if our monolith had a README. AgentReady scored us 23/100. The AI couldn't figure out our codebase because *we* couldn't figure out our codebase. Investors were not impressed."
+> — *VP Engineering, Learning About README Files The Hard Way*
 
-> "We tried to skip documentation because 'the AI can figure it out.' Narrator: *The AI could not figure it out.* AgentReady's 80/100 score was a wake-up call that maybe, just maybe, basic engineering hygiene still matters in 2025."
-> — *Tech Lead, Back to Reading The Manual*
+> "Spent the year at conferences saying 'AI will 10x productivity' while our agents hallucinated imports, invented APIs, and confidently suggested `rm -rf /`. AgentReady showed us we're missing pre-commit hooks, type annotations, and basic self-awareness. The only thing getting 10x'd was our incident rate."
+> — *Tech Lead, Reformed Hype Man*
 
-> "I ran AgentReady expecting it to tell me my code was perfect. Instead it created a singularity of technical debt that collapsed into a black hole of missing README files, zero test coverage, and 47 TODO comments from 2019. Thanks, Claude!"
-> — *Developer, Now Confronting Reality*
+> "Asked ChatGPT to refactor our auth system. It wrote beautiful code that compiled perfectly and had zero relation to our actual database schema. Turns out when you have no CLAUDE.md file, no ADRs, and variable names like `data2_final_FINAL`, even AGI would just be guessing. And AGI doesn't exist yet."
+> — *Staff Engineer, Back to Documentation Basics*
+
+> "My manager saw a demo where AI 'wrote an entire app' and asked why I'm still employed. I showed him our AgentReady score of 31/100, explained that missing lock files and zero test coverage make AI as useful as a Magic 8-Ball, and we spent the next quarter actually engineering instead of prompt-debugging. AI didn't replace me. Basic hygiene saved me."
+> — *Developer, Still Employed, Surprisingly*
 
 ## Ready to Get Started?
 
