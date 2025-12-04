@@ -3,8 +3,6 @@ layout: page
 title: User Guide
 ---
 
-# User Guide
-
 Complete guide to installing, configuring, and using AgentReady to assess your repositories.
 
 ## Table of Contents
