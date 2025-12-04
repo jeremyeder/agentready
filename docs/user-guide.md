@@ -77,7 +77,6 @@ cd /path/to/repos
 agentready batch repo1/ repo2/ repo3/ --output-dir ./batch-reports
 open batch-reports/comparison-summary.html
 ```
-
 ---
 
 ## Bootstrap Your Repository
