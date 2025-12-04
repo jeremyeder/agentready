@@ -8,7 +8,7 @@ and generates a consolidated leaderboard.json for Jekyll consumption.
 import json
 import sys
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -72,7 +72,6 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
     """
     overall = []
     by_language = defaultdict(list)
-    by_size = defaultdict(list)
     most_improved = []
 
     for repo_name, submissions in repos.items():
@@ -86,14 +85,20 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
             agentready_version = metadata.get("agentready_version", "unknown")
             research_version = metadata.get("research_version", "unknown")
 
+            # Extract primary language from languages dict (highest file count)
+            languages = latest["repository"].get("languages", {})
+            if languages:
+                primary_language = max(languages, key=languages.get)
+            else:
+                primary_language = "Unknown"
+
             entry = {
                 "repo": repo_name,
                 "org": repo_name.split("/")[0],
                 "name": repo_name.split("/")[1],
                 "score": float(latest["overall_score"]),
                 "tier": latest["certification_level"],
-                "language": latest["repository"].get("primary_language", "Unknown"),
-                "size": latest["repository"].get("size_category", "Unknown"),
+                "language": primary_language,
                 "last_updated": submissions[0]["timestamp"][:10],  # YYYY-MM-DD
                 "url": latest["repository"]["url"],
                 "agentready_version": agentready_version,
@@ -115,7 +120,6 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
 
             overall.append(entry)
             by_language[entry["language"]].append(entry)
-            by_size[entry["size"]].append(entry)
 
             # Calculate improvement if multiple submissions
             if len(submissions) > 1:
@@ -157,9 +161,6 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
     for lang in by_language:
         by_language[lang].sort(key=lambda x: x["score"], reverse=True)
 
-    for size in by_size:
-        by_size[size].sort(key=lambda x: x["score"], reverse=True)
-
     most_improved.sort(key=lambda x: x["improvement"], reverse=True)
 
     # Add ranks
@@ -173,11 +174,10 @@ def generate_leaderboard_data(repos: dict[str, list[dict[str, Any]]]) -> dict[st
             entry["lang_rank"][lang] = i
 
     return {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "total_repositories": len(overall),
         "overall": overall,
         "by_language": dict(by_language),
-        "by_size": dict(by_size),
         "most_improved": most_improved[:20],  # Top 20
     }
 
@@ -200,11 +200,12 @@ def main():
     if not repos:
         print("No submissions found. Creating empty leaderboard.")
         leaderboard_data = {
-            "generated_at": datetime.utcnow().isoformat() + "Z",
+            "generated_at": datetime.now(timezone.utc)
+            .isoformat()
+            .replace("+00:00", "Z"),
             "total_repositories": 0,
             "overall": [],
             "by_language": {},
-            "by_size": {},
             "most_improved": [],
         }
     else:

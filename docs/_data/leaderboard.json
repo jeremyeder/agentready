@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-03T23:03:27.289632Z",
+  "generated_at": "2025-12-04T07:35:51.161072Z",
   "total_repositories": 1,
   "overall": [
     {
@@ -8,8 +8,7 @@
       "name": "agentready",
       "score": 78.6,
       "tier": "Gold",
-      "language": "Unknown",
-      "size": "Unknown",
+      "language": "Python",
       "last_updated": "2025-12-03",
       "url": "git@github.com:ambient-code/agentready.git",
       "agentready_version": "2.9.0",
@@ -24,20 +23,19 @@
       ],
       "rank": 1,
       "lang_rank": {
-        "Unknown": 1
+        "Python": 1
       }
     }
   ],
   "by_language": {
-    "Unknown": [
+    "Python": [
       {
         "repo": "ambient-code/agentready",
         "org": "ambient-code",
         "name": "agentready",
         "score": 78.6,
         "tier": "Gold",
-        "language": "Unknown",
-        "size": "Unknown",
+        "language": "Python",
         "last_updated": "2025-12-03",
         "url": "git@github.com:ambient-code/agentready.git",
         "agentready_version": "2.9.0",
@@ -52,36 +50,7 @@
         ],
         "rank": 1,
         "lang_rank": {
-          "Unknown": 1
-        }
-      }
-    ]
-  },
-  "by_size": {
-    "Unknown": [
-      {
-        "repo": "ambient-code/agentready",
-        "org": "ambient-code",
-        "name": "agentready",
-        "score": 78.6,
-        "tier": "Gold",
-        "language": "Unknown",
-        "size": "Unknown",
-        "last_updated": "2025-12-03",
-        "url": "git@github.com:ambient-code/agentready.git",
-        "agentready_version": "2.9.0",
-        "research_version": "1.0.0",
-        "history": [
-          {
-            "date": "2025-12-03",
-            "score": 78.6,
-            "agentready_version": "2.9.0",
-            "research_version": "1.0.0"
-          }
-        ],
-        "rank": 1,
-        "lang_rank": {
-          "Unknown": 1
+          "Python": 1
         }
       }
     ]
