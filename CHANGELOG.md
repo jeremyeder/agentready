@@ -1,3 +1,10 @@
+# [2.12.0](https://github.com/jeremyeder/agentready/compare/v2.11.0...v2.12.0) (2025-12-04)
+
+
+### Features
+
+* redesign navigation with dropdown menu and pipeline highlight ([0ad9017](https://github.com/jeremyeder/agentready/commit/0ad901736a2e2c3c13111bcc3e0bce380720315c))
+
 # [2.11.0](https://github.com/jeremyeder/agentready/compare/v2.10.0...v2.11.0) (2025-12-04)
 
 
