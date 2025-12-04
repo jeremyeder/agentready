@@ -36,12 +36,12 @@ AI-assisted development tools like Claude Code, GitHub Copilot, and Cursor AI wo
   </div>
   <div class="feature">
     <h3>🔧 Align (Automated Remediation)</h3>
-    <p><strong>Automatically fix assessment failures.</strong> Creates missing files (CLAUDE.md, README), configures pre-commit hooks, updates .gitignore, and applies best practices to boost your score instantly.</p>
-    <p><strong>When to use:</strong> After assessment, to automatically remediate issues and improve score without manual work.</p>
+    <p><strong>Automatically fix infrastructure gaps.</strong> Creates missing files (CLAUDE.md, README), configures pre-commit hooks, updates .gitignore, and establishes foundations that make AI agents immediately effective.</p>
+    <p><strong>When to use:</strong> After assessment, to automatically establish baseline agent-ready infrastructure without manual work.</p>
   </div>
   <div class="feature">
     <h3>📈 Monitor (Continuous Quality)</h3>
-    <p><strong>Runs assess automatically in CI/CD.</strong> Posts PR comments, tracks score over time, fails builds on regressions, and maintains quality gates without manual intervention.</p>
+    <p><strong>Runs assess automatically in CI/CD.</strong> Posts PR comments, tracks codebase quality over time, fails builds on infrastructure regressions, and maintains agent effectiveness gates.</p>
     <p><strong>When to use:</strong> After bootstrap, runs automatically on every PR and push to main branch.</p>
   </div>
 </div>
@@ -109,28 +109,28 @@ git push
 - ✅ Contributing guidelines and Code of Conduct
 - ✅ Automatic AgentReady assessment on every PR
 
-### Align Workflow (Score Booster)
+### Align Workflow (Automated Remediation)
 
 ```bash
-# Assess first to see current state
+# Assess first to identify gaps
 agentready assess .
 
-# Automatically fix issues to improve score
+# Automatically apply fixes
 agentready align --dry-run .  # Preview changes first
 agentready align .            # Apply fixes
 
-# Re-assess to see improvements
+# Re-assess to validate improvements
 agentready assess .
 ```
 
-**What align does automatically:**
+**What align fixes automatically:**
 
-- ✅ Creates missing CLAUDE.md with project context template
-- ✅ Creates/updates README.md with proper structure
-- ✅ Adds pre-commit hooks configuration
-- ✅ Updates .gitignore with language-specific patterns
-- ✅ Creates .gitattributes for consistent line endings
-- ✅ Boosts your score by 20-40 points in seconds
+- ✅ Creates CLAUDE.md so agents understand your project context
+- ✅ Creates/updates README.md so agents have clear entry points
+- ✅ Adds pre-commit hooks so agents can't commit broken code
+- ✅ Updates .gitignore so agents don't navigate through noise
+- ✅ Creates .gitattributes for consistent file handling
+- ✅ Establishes foundations that make agents immediately more effective
 
 ### Manual Assessment Workflow
 
@@ -176,7 +176,7 @@ jobs:
 **CI/CD benefits:**
 
 - ✅ Automated quality gates on every PR
-- ✅ Score regression detection (fail if score drops)
+- ✅ Infrastructure regression detection (fail if agent-ready foundations degrade)
 - ✅ Historical tracking with artifact uploads
 - ✅ Automatic PR comments with assessment results
 - ✅ Zero manual intervention required
