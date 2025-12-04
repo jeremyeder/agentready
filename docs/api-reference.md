@@ -1152,7 +1152,6 @@ except Exception as e:
 
 - **[User Guide](user-guide.html)** — CLI usage and configuration
 - **[Developer Guide](developer-guide.html)** — Implementing custom assessors
-- **[Attributes](attributes.html)** — Complete attribute reference
 - **[Examples](examples.html)** — Real-world integration examples
 
 ---

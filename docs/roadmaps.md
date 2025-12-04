@@ -529,7 +529,6 @@ git push
 
 - **[User Guide](user-guide.html)** — Install and run your first assessment
 - **[Developer Guide](developer-guide.html)** — Contribute to AgentReady development
-- **[Attributes Reference](attributes.html)** — Understand the 25 agent-ready attributes
 - **[API Reference](api-reference.html)** — Integrate AgentReady into your tools
 - **[Examples](examples.html)** — See real-world assessment reports
 
