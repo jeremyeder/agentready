@@ -1,3 +1,10 @@
+## [2.12.2](https://github.com/jeremyeder/agentready/compare/v2.12.1...v2.12.2) (2025-12-04)
+
+
+### Bug Fixes
+
+* extract language from assessment and remove pointless size field ([b56403c](https://github.com/jeremyeder/agentready/commit/b56403c3a070230344254de4117136633aab29e5))
+
 ## [2.12.1](https://github.com/jeremyeder/agentready/compare/v2.12.0...v2.12.1) (2025-12-04)
 
 
