@@ -122,6 +122,81 @@ open .agentready/report-latest.html
 
 [Read the complete user guide →](user-guide.html)
 
+## CLI Reference
+
+AgentReady provides a comprehensive CLI with multiple commands for different workflows:
+
+```
+Usage: agentready [OPTIONS] COMMAND [ARGS]...
+
+  AgentReady Repository Scorer - Assess repositories for AI-assisted
+  development.
+
+  Evaluates repositories against 25 evidence-based attributes and generates
+  comprehensive reports with scores, findings, and remediation guidance.
+
+Options:
+  --version  Show version information
+  --help     Show this message and exit.
+
+Commands:
+  align             Align repository with best practices by applying fixes
+  assess            Assess a repository against agent-ready criteria
+  assess-batch      Assess multiple repositories in a batch operation
+  bootstrap         Bootstrap repository with GitHub infrastructure
+  demo              Run an automated demonstration of AgentReady
+  experiment        SWE-bench experiment commands
+  extract-skills    Extract reusable patterns and generate Claude Code skills
+  generate-config   Generate example configuration file
+  learn             Extract reusable patterns and generate skills (alias)
+  migrate-report    Migrate assessment report to different schema version
+  repomix-generate  Generate Repomix repository context for AI consumption
+  research          Manage and validate research reports
+  research-version  Show bundled research report version
+  submit            Submit assessment results to AgentReady leaderboard
+  validate-report   Validate assessment report against schema version
+```
+
+### Core Commands
+
+<div class="command-grid">
+  <div class="command-box">
+    <h4>🚀 <a href="user-guide.html#bootstrap-your-repository">bootstrap</a></h4>
+    <p>One-command infrastructure generation. Creates GitHub Actions, pre-commit hooks, issue/PR templates, and more.</p>
+    <code>agentready bootstrap .</code>
+  </div>
+
+  <div class="command-box">
+    <h4>🔧 <a href="user-guide.html#align-command">align</a></h4>
+    <p>Automated remediation. Applies fixes to improve your score (create CLAUDE.md, add pre-commit hooks, update .gitignore).</p>
+    <code>agentready align --dry-run .</code>
+  </div>
+
+  <div class="command-box">
+    <h4>📊 <a href="user-guide.html#running-assessments">assess</a></h4>
+    <p>Deep analysis of 25 attributes. Generates HTML, Markdown, and JSON reports with remediation guidance.</p>
+    <code>agentready assess .</code>
+  </div>
+
+  <div class="command-box">
+    <h4>🏆 <a href="leaderboard.html">submit</a></h4>
+    <p>Submit your score to the public leaderboard. Track improvements and compare with other repositories.</p>
+    <code>agentready submit</code>
+  </div>
+</div>
+
+### Specialized Commands
+
+- **`assess-batch`** - Assess multiple repositories in parallel ([batch documentation →](user-guide.html#batch-assessment))
+- **`demo`** - Interactive demonstration mode showing AgentReady in action
+- **`extract-skills`/`learn`** - Generate Claude Code skills from repository patterns
+- **`repomix-generate`** - Create AI-optimized repository context files
+- **`experiment`** - Run SWE-bench validation studies ([experiments →](developer-guide.html#experiments))
+- **`research`** - Manage research report versions and validation
+- **`migrate-report`/`validate-report`** - Schema management and migration tools
+
+[View detailed command documentation →](user-guide.html#command-reference)
+
 ## Certification Levels
 
 AgentReady scores repositories on a 0-100 scale with tier-weighted attributes:

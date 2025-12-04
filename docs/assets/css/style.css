@@ -912,3 +912,89 @@ button:focus,
 .announcement-text a:hover {
   border-bottom-color: var(--color-primary);
 }
+
+/* ============================================
+   CLI Command Reference Grid
+   ============================================ */
+
+.command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+  margin: var(--space-6) 0 var(--space-8) 0;
+}
+
+.command-box {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-gray-200);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.command-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.command-box:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+  transform: translateY(-2px);
+}
+
+.command-box:hover::before {
+  transform: scaleX(1);
+}
+
+.command-box h4 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.command-box h4 a {
+  color: var(--color-gray-900);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.command-box h4 a:hover {
+  color: var(--color-primary);
+}
+
+.command-box p {
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-gray-600);
+}
+
+.command-box code {
+  display: block;
+  background-color: var(--color-gray-900);
+  color: #10b981;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-top: auto;
+}
+
+@media (max-width: 768px) {
+  .command-grid {
+    grid-template-columns: 1fr;
+  }
+}
