@@ -21,20 +21,6 @@
   <!-- Skip to main content for accessibility -->
   <a href="#main-content" class="skip-to-main">Skip to main content</a>
 
-  <!-- Header -->
-  <header>
-    <nav>
-      <div class="container">
-        <ul>
-          {% for item in site.navigation %}
-            <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
-          {% endfor %}
-          <li><a href="{{ site.repository }}" target="_blank" rel="noopener">GitHub</a></li>
-        </ul>
-      </div>
-    </nav>
-  </header>
-
   <!-- Main Content -->
   <main id="main-content" class="container">
     <div class="content">
