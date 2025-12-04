@@ -23,6 +23,104 @@ When commits are merged to `main`:
 5. **Git tag is created** (e.g., `v1.0.0`)
 6. **GitHub Release is published** with release notes
 7. **Changes are committed** back to main with `[skip ci]`
+8. **PyPI packages published** to Test PyPI and production PyPI (OIDC authentication)
+9. **Post-release housekeeping** executes:
+   - Release summary generation with installation links
+   - Self-assessment runs and commits updated scores
+   - Multi-platform Docker images built and pushed to ghcr.io
+   - Documentation deployed to GitHub Pages
+   - Version synchronized across all documentation files
+
+### 📊 Complete Pipeline Visualization
+
+For a detailed, interactive visualization of the entire release process with flowcharts and sequence diagrams, see:
+
+**[Release Process Visualization →](release-process-visualization.html)**
+
+The visualization includes:
+- High-level release flow with decision points
+- Semantic release plugin execution order
+- Version synchronization across files
+- PyPI publishing with OIDC trusted publishing
+- All 5 post-release housekeeping steps
+- Docker multi-platform build process
+- Documentation deployment flow
+- Typical release timeline (0:00 - 3:30)
+
+## Real-World Example: v2.12.1 Release
+
+Here's an actual release that demonstrates the complete automated pipeline in action:
+
+### Timeline
+
+| Time | Step | Details |
+|------|------|---------|
+| 0:00 | **Commit Merged** | PR #155 merged: `fix: disable attestations for Test PyPI` |
+| 0:05 | **Semantic Analysis** | Detected `fix:` commit → patch release (2.12.0 → 2.12.1) |
+| 0:15 | **Version Bump** | Updated pyproject.toml, CLAUDE.md, README.md |
+| 0:30 | **CHANGELOG Generated** | Release notes extracted from commit messages |
+| 0:45 | **GitHub Release Created** | Tag v2.12.1 created with assets |
+| 1:00 | **Test PyPI Published** | Package uploaded to test.pypi.org (attestations: false) |
+| 1:15 | **Production PyPI Published** | Package uploaded to pypi.org (attestations: true) |
+| 1:30 | **Release Summary Generated** | GitHub Actions summary with installation commands |
+| 1:45 | **Self-Assessment Run** | AgentReady assessed itself: 80.0/100 (Gold) |
+| 2:00 | **Self-Assessment Committed** | Results pushed to examples/self-assessment/ |
+| 2:15 | **Docker Images Built** | Multi-platform build (linux/amd64, linux/arm64) |
+| 2:30 | **Docker Images Pushed** | Published to ghcr.io/ambient-code/agentready:2.12.1 and :latest |
+| 2:45 | **Documentation Deployed** | docs/ pushed to GitHub Pages |
+| 3:00 | **✅ Release Complete** | All artifacts published, quality validated |
+
+### What Was Published
+
+**PyPI Package**:
+- Production: https://pypi.org/project/agentready/2.12.1/
+- Test: https://test.pypi.org/project/agentready/2.12.1/
+- Installation: `pip install agentready==2.12.1`
+
+**Docker Images**:
+- `ghcr.io/ambient-code/agentready:2.12.1` (immutable)
+- `ghcr.io/ambient-code/agentready:latest` (rolling)
+- Usage: `docker run ghcr.io/ambient-code/agentready:2.12.1 assess /path/to/repo`
+
+**Documentation**:
+- GitHub Pages: https://ambient-code.github.io/agentready/
+- Updated with v2.12.1 references
+
+**GitHub Release**:
+- Release Notes: https://github.com/ambient-code/agentready/releases/tag/v2.12.1
+- Source code archives + distribution files
+
+### Commit That Triggered It
+
+```bash
+fix: disable attestations for Test PyPI to avoid conflict (#155)
+
+- Disable attestations for Test PyPI publish step
+- Keep attestations enabled for production PyPI
+- Prevents "attestation files already exist" error when publishing to both
+
+The pypa/gh-action-pypi-publish action creates attestation files (.publish.attestation)
+during the first publish. When we try to publish to a second repository in the same
+workflow run, it tries to create them again, causing a conflict.
+
+Solution: Disable attestations for Test PyPI (validation only), enable for production.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-authored-by: Claude <noreply@anthropic.com>
+```
+
+### Why This Release Was Successful
+
+1. **Proper conventional commit** (`fix:`) triggered semantic-release
+2. **No PR reference conflicts** (all PRs existed in the repository)
+3. **OIDC authentication** worked without tokens
+4. **Attestation settings** correctly configured (false for Test PyPI, true for production)
+5. **All housekeeping steps** completed without errors
+6. **Self-assessment** validated repository quality (80.0/100)
+7. **Multi-platform Docker builds** succeeded with cache
+
+This is the gold standard for releases in this repository.
 
 ## Conventional Commit Format
 
@@ -197,9 +295,12 @@ If CHANGELOG.md has merge conflicts:
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 2.12.1 | 2025-12-04 | Fix PyPI attestation conflicts, automated dual publishing |
+| 2.12.0 | 2025-12-04 | OIDC trusted publishing, automated PyPI releases |
+| 2.9.0 | 2025-11-28 | Community leaderboard, batch assessment |
 | 1.0.0 | 2025-11-21 | Initial release with core assessment engine |
 
 ---
 
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-12-04
 **Maintained By**: AgentReady Team

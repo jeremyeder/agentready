@@ -86,3 +86,93 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           attestations: true  # Enable attestations for production
+
+      # ========================================
+      # Post-Release Housekeeping
+      # ========================================
+
+      - name: Generate release summary
+        if: steps.check_release.outputs.new_release == 'true'
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          # 🚀 Release ${{ steps.check_release.outputs.version }}
+
+          **Published**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## 📦 Installation
+          \`\`\`bash
+          # PyPI
+          pip install agentready==${{ steps.check_release.outputs.version }}
+
+          # Docker
+          docker pull ghcr.io/${{ github.repository }}:${{ steps.check_release.outputs.version }}
+          \`\`\`
+
+          ## 🔗 Links
+          - [PyPI](https://pypi.org/project/agentready/${{ steps.check_release.outputs.version }}/)
+          - [Test PyPI](https://test.pypi.org/project/agentready/${{ steps.check_release.outputs.version }}/)
+          - [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.check_release.outputs.version }})
+          - [Docker Image](https://ghcr.io/${{ github.repository }}:${{ steps.check_release.outputs.version }})
+          - [Documentation](https://ambient-code.github.io/agentready/)
+          EOF
+
+      - name: Run self-assessment
+        if: steps.check_release.outputs.new_release == 'true'
+        run: |
+          echo "📊 Running self-assessment..."
+          agentready assess . --output-dir examples/self-assessment
+
+          # Display score
+          python3 -c "
+          import json
+          with open('examples/self-assessment/assessment-latest.json') as f:
+              data = json.load(f)
+              print(f\"Self-Assessment: {data['overall_score']}/100 ({data['certification_level']})\")
+          "
+
+      - name: Commit updated self-assessment
+        if: steps.check_release.outputs.new_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add examples/self-assessment/
+          if git diff --staged --quiet; then
+            echo "No changes to self-assessment"
+          else
+            git commit -m "chore: update self-assessment for v${{ steps.check_release.outputs.version }} [skip ci]"
+            git push
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_release.outputs.new_release == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: steps.check_release.outputs.new_release == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: steps.check_release.outputs.new_release == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.check_release.outputs.version }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy documentation to GitHub Pages
+        if: steps.check_release.outputs.new_release == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          commit_message: "docs: deploy for v${{ steps.check_release.outputs.version }}"

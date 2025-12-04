@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentReady Release Process - End-to-End Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #4a5568;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .diagram {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-box {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .info-box h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .warning-box {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box h4 {
+            color: #ed8936;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .success-box {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .success-box h4 {
+            color: #48bb78;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        code {
+            background: #2d3748;
+            color: #f7fafc;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background: #2d3748;
+            color: #f7fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            margin-bottom: 1.5rem;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-card p {
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #cbd5e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.25rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .timeline-item h4 {
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-item p {
+            color: #718096;
+            font-size: 0.95rem;
+        }
+
+        footer {
+            background: #2d3748;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .badge-info {
+            background: #4299e1;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 AgentReady Release Process</h1>
+            <p>Complete End-to-End Visualization of Automated Release Pipeline</p>
+            <div style="margin-top: 1rem;">
+                <span class="badge badge-primary">Semantic Release</span>
+                <span class="badge badge-success">OIDC Publishing</span>
+                <span class="badge badge-info">Multi-Platform Docker</span>
+                <span class="badge badge-warning">Auto-Documentation</span>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Overview Section -->
+            <section id="overview">
+                <h2>📋 Overview</h2>
+                <div class="info-box">
+                    <h4>Release Automation Strategy</h4>
+                    <p>AgentReady uses a fully automated release pipeline triggered by conventional commits to the <code>main</code> branch. The workflow handles versioning, package distribution, containerization, documentation deployment, and quality validation—all without manual intervention.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔄 Semantic Versioning</h4>
+                        <p>Automatic version bumping based on commit messages (feat: minor, fix: patch, BREAKING: major)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔒 OIDC Publishing</h4>
+                        <p>Token-less PyPI publishing using GitHub's trusted identity provider</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🐳 Docker Distribution</h4>
+                        <p>Multi-platform container images (amd64/arm64) pushed to GitHub Container Registry</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📊 Self-Assessment</h4>
+                        <p>Automatic quality validation using AgentReady's own assessment tools</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📚 Documentation Sync</h4>
+                        <p>GitHub Pages deployment with version-synchronized documentation</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📝 Release Notes</h4>
+                        <p>Automated changelog generation and GitHub release creation</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- High-Level Flow -->
+            <section id="high-level-flow">
+                <h2>🔄 High-Level Release Flow</h2>
+                <div class="diagram">
+                    <div class="mermaid">
+graph TB
+    Start([Developer Commits<br/>to Main Branch]) --> ConventionalCommit{Conventional<br/>Commit?}
+    ConventionalCommit -->|Yes| TriggerWorkflow[Trigger Release Workflow]
+    ConventionalCommit -->|No| End1([No Release])
+
+    TriggerWorkflow --> Checkout[Checkout Code<br/>fetch-depth: 0]
+    Checkout --> SetupNode[Setup Node.js LTS]
+    SetupNode --> InstallSR[Install Semantic Release<br/>+ Plugins]
+
+    InstallSR --> GetVersionBefore[Get Current Version<br/>from pyproject.toml]
+    GetVersionBefore --> RunSemantic[Run Semantic Release]
+
+    RunSemantic --> AnalyzeCommits[Analyze Commits]
+    AnalyzeCommits --> DetermineVersion{New Version<br/>Needed?}
+
+    DetermineVersion -->|No| End2([No Release])
+    DetermineVersion -->|Yes| BumpVersion[Bump Version]
+
+    BumpVersion --> GenerateChangelog[Generate CHANGELOG.md]
+    GenerateChangelog --> SyncFiles[Sync pyproject.toml<br/>CLAUDE.md, README.md]
+    SyncFiles --> CommitChanges[Commit Version Files]
+    CommitChanges --> CreateGHRelease[Create GitHub Release]
+
+    CreateGHRelease --> BuildPackage[Build Python Package]
+    BuildPackage --> PublishTestPyPI[Publish to Test PyPI<br/>attestations: false]
+    PublishTestPyPI --> PublishPyPI[Publish to PyPI<br/>attestations: true]
+
+    PublishPyPI --> Housekeeping[Post-Release Housekeeping]
+
+    Housekeeping --> Summary[Generate Release Summary]
+    Housekeeping --> SelfAssess[Run Self-Assessment]
+    Housekeeping --> Docker[Build & Push Docker]
+    Housekeeping --> Docs[Deploy Documentation]
+
+    Summary --> End3([Release Complete])
+    SelfAssess --> End3
+    Docker --> End3
+    Docs --> End3
+
+    style Start fill:#667eea,stroke:#5a67d8,color:#fff
+    style End1 fill:#cbd5e0,stroke:#a0aec0,color:#2d3748
+    style End2 fill:#cbd5e0,stroke:#a0aec0,color:#2d3748
+    style End3 fill:#48bb78,stroke:#38a169,color:#fff
+    style RunSemantic fill:#ed8936,stroke:#dd6b20,color:#fff
+    style Housekeeping fill:#4299e1,stroke:#3182ce,color:#fff
+                    </div>
+                </div>
+            </section>
+
+            <!-- Semantic Release Details -->
+            <section id="semantic-release">
+                <h2>🤖 Semantic Release Pipeline</h2>
+                <div class="info-box">
+                    <h4>Configuration: .releaserc.json</h4>
+                    <p>Semantic Release orchestrates version management, changelog generation, and file synchronization using a plugin-based architecture.</p>
+                </div>
+
+                <div class="diagram">
+                    <div class="mermaid">
+sequenceDiagram
+    participant GHA as GitHub Actions
+    participant SR as Semantic Release
+    participant Analyzer as Commit Analyzer
+    participant Changelog as Changelog Plugin
+    participant Exec as Exec Plugin
+    participant GitHub as GitHub Plugin
+    participant Git as Git Plugin
+
+    GHA->>SR: npx semantic-release
+    SR->>Analyzer: Analyze commits since last release
+    Analyzer->>SR: Determine version bump (major/minor/patch)
+
+    SR->>Changelog: Generate release notes
+    Changelog->>SR: CHANGELOG.md updated
+
+    SR->>Exec: Run prepareCmd
+    Note over Exec: sed -i 's/version = .*/version = "X.Y.Z"/' pyproject.toml<br/>bash scripts/sync-claude-md.sh X.Y.Z
+    Exec->>SR: Files updated
+
+    SR->>GitHub: Create GitHub release with assets
+    GitHub->>SR: Release created
+
+    SR->>Git: Commit and push changes
+    Note over Git: Commits: CHANGELOG.md, pyproject.toml,<br/>CLAUDE.md, README.md
+    Git->>SR: Changes pushed [skip ci]
+
+    SR->>GHA: Version bumped to X.Y.Z
+                    </div>
+                </div>
+
+                <h3>Plugin Execution Order</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>@semantic-release/commit-analyzer</strong><br>
+                        Analyzes commit messages to determine version bump type using conventional commits
+                    </li>
+                    <li>
+                        <strong>@semantic-release/release-notes-generator</strong><br>
+                        Generates release notes from commits grouped by type (feat, fix, docs, etc.)
+                    </li>
+                    <li>
+                        <strong>@semantic-release/changelog</strong><br>
+                        Updates CHANGELOG.md with new release notes
+                    </li>
+                    <li>
+                        <strong>@semantic-release/exec</strong><br>
+                        Executes shell commands to update version in pyproject.toml and sync CLAUDE.md/README.md
+                    </li>
+                    <li>
+                        <strong>@semantic-release/github</strong><br>
+                        Creates GitHub release with distribution assets (dist/*)
+                    </li>
+                    <li>
+                        <strong>@semantic-release/git</strong><br>
+                        Commits version changes back to repository with [skip ci] flag
+                    </li>
+                </ol>
+            </section>
+
+            <!-- Version Sync Details -->
+            <section id="version-sync">
+                <h2>🔄 Version Synchronization</h2>
+                <div class="diagram">
+                    <div class="mermaid">
+graph LR
+    SR[Semantic Release<br/>nextRelease.version] --> Script[scripts/sync-claude-md.sh]
+
+    Script --> Update1[Update pyproject.toml<br/>version = "X.Y.Z"]
+    Script --> Update2[Update CLAUDE.md<br/>vX.Y.Z references]
+    Script --> Update3[Update CLAUDE.md<br/>Last Updated dates]
+    Script --> Update4[Update Self-Assessment<br/>Score if available]
+
+    Update1 --> Commit[Git Commit]
+    Update2 --> Commit
+    Update3 --> Commit
+    Update4 --> Commit
+
+    Commit --> Push[Git Push with [skip ci]]
+
+    style SR fill:#ed8936,stroke:#dd6b20,color:#fff
+    style Script fill:#4299e1,stroke:#3182ce,color:#fff
+    style Commit fill:#48bb78,stroke:#38a169,color:#fff
+                    </div>
+                </div>
+
+                <h3>File Update Patterns</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Pattern</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>pyproject.toml</code></td>
+                            <td><code>version = "X.Y.Z"</code></td>
+                            <td><code>version = "2.13.0"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CLAUDE.md</code></td>
+                            <td><code>vX.Y.Z</code></td>
+                            <td><code>v2.12.2</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CLAUDE.md</code></td>
+                            <td><code>**Last Updated**: YYYY-MM-DD</code></td>
+                            <td><code>**Last Updated**: 2025-12-04</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CLAUDE.md</code></td>
+                            <td><code>**AgentReady Version**: X.Y.Z</code></td>
+                            <td><code>**AgentReady Version**: 2.13.0</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>README.md</code></td>
+                            <td><em>Future: version badges</em></td>
+                            <td><code>[![PyPI](badge-url)]</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- PyPI Publishing -->
+            <section id="pypi-publishing">
+                <h2>📦 PyPI Publishing (OIDC)</h2>
+                <div class="success-box">
+                    <h4>Token-Less Authentication</h4>
+                    <p>Using OpenID Connect (OIDC) trusted publishing, the workflow authenticates to PyPI without storing any API tokens. GitHub's identity provider issues short-lived tokens automatically.</p>
+                </div>
+
+                <div class="diagram">
+                    <div class="mermaid">
+sequenceDiagram
+    participant GHA as GitHub Actions
+    participant OIDC as GitHub OIDC Provider
+    participant TestPyPI as Test PyPI
+    participant PyPI as Production PyPI
+
+    GHA->>GHA: Setup Python 3.12
+    GHA->>GHA: Install build dependencies
+    GHA->>GHA: python -m build
+    Note over GHA: Creates dist/*.whl and dist/*.tar.gz
+
+    GHA->>OIDC: Request OIDC token
+    OIDC->>GHA: Issue short-lived token
+
+    GHA->>TestPyPI: Publish package (attestations: false)
+    Note over GHA,TestPyPI: pypa/gh-action-pypi-publish@release/v1<br/>repository-url: test.pypi.org
+    TestPyPI->>GHA: Package published
+
+    GHA->>OIDC: Request OIDC token
+    OIDC->>GHA: Issue short-lived token
+
+    GHA->>PyPI: Publish package (attestations: true)
+    Note over GHA,PyPI: pypa/gh-action-pypi-publish@release/v1<br/>Creates .publish.attestation
+    PyPI->>GHA: Package published + attested
+                    </div>
+                </div>
+
+                <h3>Attestation Strategy</h3>
+                <div class="warning-box">
+                    <h4>Why Different Attestation Settings?</h4>
+                    <p><strong>Test PyPI: attestations: false</strong> - Prevents creation of .publish.attestation files that would conflict with production publishing</p>
+                    <p><strong>Production PyPI: attestations: true</strong> - Generates Sigstore attestations for package authenticity verification</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>URL</th>
+                            <th>Attestations</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Test PyPI</td>
+                            <td><code>test.pypi.org/legacy/</code></td>
+                            <td>Disabled</td>
+                            <td>Pre-release validation</td>
+                        </tr>
+                        <tr>
+                            <td>Production PyPI</td>
+                            <td><code>pypi.org</code></td>
+                            <td>Enabled</td>
+                            <td>Official distribution</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Housekeeping Steps -->
+            <section id="housekeeping">
+                <h2>🧹 Post-Release Housekeeping</h2>
+                <div class="info-box">
+                    <h4>Five Automated Steps</h4>
+                    <p>After successful PyPI publishing, the workflow executes five housekeeping tasks to maintain repository quality, distribute artifacts, and update documentation.</p>
+                </div>
+
+                <div class="diagram">
+                    <div class="mermaid">
+graph TB
+    Start([PyPI Publishing Complete]) --> HK1[1. Generate Release Summary]
+    Start --> HK2[2. Run Self-Assessment]
+    Start --> HK3[3. Build & Push Docker]
+    Start --> HK4[4. Deploy Documentation]
+
+    HK1 --> Summary[GitHub Actions Summary<br/>with install commands & links]
+
+    HK2 --> Assess[agentready assess .]
+    Assess --> Display[Display Score in Logs]
+    Display --> Commit[Commit to examples/self-assessment/]
+
+    HK3 --> Buildx[Setup Docker Buildx]
+    Buildx --> Login[Login to ghcr.io]
+    Login --> Build[Build Multi-Platform<br/>linux/amd64, linux/arm64]
+    Build --> Push[Push to ghcr.io<br/>Tags: latest, vX.Y.Z]
+
+    HK4 --> GHPages[Deploy docs/ to GitHub Pages<br/>peaceiris/actions-gh-pages@v4]
+
+    Summary --> End([All Housekeeping Complete])
+    Commit --> End
+    Push --> End
+    GHPages --> End
+
+    style Start fill:#667eea,stroke:#5a67d8,color:#fff
+    style End fill:#48bb78,stroke:#38a169,color:#fff
+    style HK1 fill:#4299e1,stroke:#3182ce,color:#fff
+    style HK2 fill:#4299e1,stroke:#3182ce,color:#fff
+    style HK3 fill:#4299e1,stroke:#3182ce,color:#fff
+    style HK4 fill:#4299e1,stroke:#3182ce,color:#fff
+                    </div>
+                </div>
+
+                <h3>1. Release Summary</h3>
+                <div class="feature-card">
+                    <h4>GitHub Actions Summary Output</h4>
+                    <p>Generates markdown summary visible in workflow runs with:</p>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Version and publish timestamp</li>
+                        <li>Installation commands (pip + docker)</li>
+                        <li>Direct links to PyPI, Test PyPI, GitHub release, Docker image, and documentation</li>
+                    </ul>
+                </div>
+
+                <h3>2. Self-Assessment</h3>
+                <div class="diagram">
+                    <div class="mermaid">
+sequenceDiagram
+    participant GHA as GitHub Actions
+    participant AR as AgentReady CLI
+    participant Repo as Repository
+    participant Git as Git
+
+    GHA->>AR: agentready assess . --output-dir examples/self-assessment
+    AR->>Repo: Analyze repository attributes
+    Repo->>AR: Return findings and scores
+    AR->>AR: Generate assessment-latest.json
+    AR->>AR: Generate report HTML and MD
+    AR->>GHA: Assessment complete
+
+    GHA->>GHA: Extract overall_score and certification_level
+    GHA->>GHA: Print to logs
+
+    GHA->>Git: git add examples/self-assessment/
+    GHA->>Git: git commit -m "chore: update self-assessment for vX.Y.Z [skip ci]"
+    GHA->>Git: git push
+    Git->>GHA: Changes pushed
+                    </div>
+                </div>
+
+                <h3>3. Docker Image Distribution</h3>
+                <div class="feature-card">
+                    <h4>Multi-Platform Container Build</h4>
+                    <p>Uses Docker Buildx for cross-platform support:</p>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li><strong>Platforms:</strong> linux/amd64, linux/arm64</li>
+                        <li><strong>Base Image:</strong> python:3.12-slim</li>
+                        <li><strong>Registry:</strong> ghcr.io/ambient-code/agentready</li>
+                        <li><strong>Tags:</strong> latest (rolling) + vX.Y.Z (immutable)</li>
+                        <li><strong>Cache:</strong> GitHub Actions cache (type=gha)</li>
+                    </ul>
+                </div>
+
+                <h3>4. Documentation Deployment</h3>
+                <div class="diagram">
+                    <div class="mermaid">
+graph LR
+    Workflow[Release Workflow] --> Action[peaceiris/actions-gh-pages@v4]
+    Action --> Checkout[Checkout docs/ directory]
+    Checkout --> Build[Build GitHub Pages site]
+    Build --> Deploy[Deploy to gh-pages branch]
+    Deploy --> Live[Live at ambient-code.github.io/agentready]
+
+    style Workflow fill:#667eea,stroke:#5a67d8,color:#fff
+    style Live fill:#48bb78,stroke:#38a169,color:#fff
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timeline -->
+            <section id="timeline">
+                <h2>⏱️ Typical Release Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>0:00 - Developer Commits</h4>
+                        <p>Conventional commit pushed to main branch triggers workflow</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>0:05 - Semantic Release</h4>
+                        <p>Version analysis, changelog generation, file synchronization</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>0:30 - Package Build</h4>
+                        <p>Python package built (wheel + tarball)</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1:00 - PyPI Publishing</h4>
+                        <p>Test PyPI and production PyPI publishing complete</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1:30 - Self-Assessment</h4>
+                        <p>AgentReady assesses repository and commits results</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2:00 - Docker Build</h4>
+                        <p>Multi-platform Docker images built and pushed (cached: ~2min, cold: ~5min)</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>3:00 - Documentation</h4>
+                        <p>GitHub Pages deployment complete</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>3:30 - Release Complete ✅</h4>
+                        <p>All artifacts published, documentation updated, quality validated</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Inventory -->
+            <section id="files">
+                <h2>📁 Configuration Files</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Purpose</th>
+                            <th>Modified By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>.github/workflows/release.yml</code></td>
+                            <td>Main release workflow orchestration</td>
+                            <td>GitHub Actions</td>
+                        </tr>
+                        <tr>
+                            <td><code>.releaserc.json</code></td>
+                            <td>Semantic release configuration</td>
+                            <td>Semantic Release</td>
+                        </tr>
+                        <tr>
+                            <td><code>pyproject.toml</code></td>
+                            <td>Python package metadata (version source)</td>
+                            <td>Semantic Release (exec plugin)</td>
+                        </tr>
+                        <tr>
+                            <td><code>scripts/sync-claude-md.sh</code></td>
+                            <td>Version synchronization script</td>
+                            <td>Semantic Release (exec plugin)</td>
+                        </tr>
+                        <tr>
+                            <td><code>CHANGELOG.md</code></td>
+                            <td>Release history and notes</td>
+                            <td>Semantic Release (changelog plugin)</td>
+                        </tr>
+                        <tr>
+                            <td><code>CLAUDE.md</code></td>
+                            <td>Project documentation (version synced)</td>
+                            <td>sync-claude-md.sh</td>
+                        </tr>
+                        <tr>
+                            <td><code>README.md</code></td>
+                            <td>User-facing documentation</td>
+                            <td>sync-claude-md.sh (future)</td>
+                        </tr>
+                        <tr>
+                            <td><code>Dockerfile</code></td>
+                            <td>Container image definition</td>
+                            <td>Docker Buildx</td>
+                        </tr>
+                        <tr>
+                            <td><code>examples/self-assessment/</code></td>
+                            <td>AgentReady assessment results</td>
+                            <td>agentready CLI</td>
+                        </tr>
+                        <tr>
+                            <td><code>docs/</code></td>
+                            <td>GitHub Pages documentation source</td>
+                            <td>peaceiris/actions-gh-pages</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Distribution Endpoints -->
+            <section id="distribution">
+                <h2>🌐 Distribution Endpoints</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📦 Production PyPI</h4>
+                        <p><strong>URL:</strong> <a href="https://pypi.org/project/agentready/" target="_blank">pypi.org/project/agentready</a></p>
+                        <p><strong>Install:</strong> <code>pip install agentready</code></p>
+                        <p><strong>Attestations:</strong> Enabled (Sigstore)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🧪 Test PyPI</h4>
+                        <p><strong>URL:</strong> <a href="https://test.pypi.org/project/agentready/" target="_blank">test.pypi.org/project/agentready</a></p>
+                        <p><strong>Install:</strong> <code>pip install --index-url https://test.pypi.org/simple/ agentready</code></p>
+                        <p><strong>Attestations:</strong> Disabled</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🐳 Docker (amd64)</h4>
+                        <p><strong>Registry:</strong> ghcr.io/ambient-code/agentready</p>
+                        <p><strong>Pull:</strong> <code>docker pull ghcr.io/ambient-code/agentready:latest</code></p>
+                        <p><strong>Platform:</strong> linux/amd64</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🐳 Docker (arm64)</h4>
+                        <p><strong>Registry:</strong> ghcr.io/ambient-code/agentready</p>
+                        <p><strong>Pull:</strong> <code>docker pull ghcr.io/ambient-code/agentready:latest</code></p>
+                        <p><strong>Platform:</strong> linux/arm64</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📚 Documentation</h4>
+                        <p><strong>URL:</strong> <a href="https://ambient-code.github.io/agentready/" target="_blank">ambient-code.github.io/agentready</a></p>
+                        <p><strong>Updated:</strong> Every release</p>
+                        <p><strong>Source:</strong> docs/ directory</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏷️ GitHub Releases</h4>
+                        <p><strong>URL:</strong> <a href="https://github.com/ambient-code/agentready/releases" target="_blank">github.com/ambient-code/agentready/releases</a></p>
+                        <p><strong>Assets:</strong> Source code, dist/ files</p>
+                        <p><strong>Notes:</strong> Auto-generated</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Monitoring -->
+            <section id="monitoring">
+                <h2>👀 Monitoring Release Progress</h2>
+                <div class="info-box">
+                    <h4>Where to Watch</h4>
+                    <p>Monitor release progress in real-time through GitHub Actions UI</p>
+                </div>
+
+                <h3>Workflow Run Sections</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Checkout code</strong><br>
+                        Repository cloned with full history (fetch-depth: 0)
+                    </li>
+                    <li>
+                        <strong>Setup Node.js</strong><br>
+                        Node.js LTS version installed for semantic-release
+                    </li>
+                    <li>
+                        <strong>Install semantic-release</strong><br>
+                        Global installation of semantic-release and plugins
+                    </li>
+                    <li>
+                        <strong>Get version before release</strong><br>
+                        Extract current version from pyproject.toml
+                    </li>
+                    <li>
+                        <strong>Run semantic-release</strong><br>
+                        Version analysis, changelog generation, file updates, GitHub release
+                    </li>
+                    <li>
+                        <strong>Get version after release</strong><br>
+                        Extract new version from pyproject.toml
+                    </li>
+                    <li>
+                        <strong>Check if new release</strong><br>
+                        Compare before/after versions to determine if release occurred
+                    </li>
+                    <li>
+                        <strong>Set up Python</strong><br>
+                        Python 3.12 environment for package building
+                    </li>
+                    <li>
+                        <strong>Install build dependencies</strong><br>
+                        Install build, wheel packages
+                    </li>
+                    <li>
+                        <strong>Build package</strong><br>
+                        Create wheel and tarball in dist/
+                    </li>
+                    <li>
+                        <strong>Publish to Test PyPI</strong><br>
+                        OIDC authentication and package upload (attestations: false)
+                    </li>
+                    <li>
+                        <strong>Publish to PyPI</strong><br>
+                        OIDC authentication and package upload (attestations: true)
+                    </li>
+                    <li>
+                        <strong>Generate release summary</strong><br>
+                        Create GitHub Actions summary with links
+                    </li>
+                    <li>
+                        <strong>Run self-assessment</strong><br>
+                        Execute agentready assess and display score
+                    </li>
+                    <li>
+                        <strong>Commit updated self-assessment</strong><br>
+                        Push assessment results to examples/self-assessment/
+                    </li>
+                    <li>
+                        <strong>Set up Docker Buildx</strong><br>
+                        Configure multi-platform build support
+                    </li>
+                    <li>
+                        <strong>Login to GitHub Container Registry</strong><br>
+                        Authenticate to ghcr.io
+                    </li>
+                    <li>
+                        <strong>Build and push Docker image</strong><br>
+                        Build for amd64/arm64 and push with version tags
+                    </li>
+                    <li>
+                        <strong>Deploy documentation to GitHub Pages</strong><br>
+                        Push docs/ to gh-pages branch
+                    </li>
+                </ol>
+
+                <div class="success-box">
+                    <h4>Success Indicators</h4>
+                    <p>✅ All steps show green checkmarks</p>
+                    <p>✅ GitHub Actions summary shows release links</p>
+                    <p>✅ PyPI shows new version on both test and production</p>
+                    <p>✅ Docker images available on ghcr.io with new version tag</p>
+                    <p>✅ GitHub Pages updated with new version</p>
+                    <p>✅ Self-assessment committed to examples/</p>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting">
+                <h2>🔧 Troubleshooting</h2>
+
+                <h3>Common Issues</h3>
+
+                <div class="warning-box">
+                    <h4>Issue: No release created</h4>
+                    <p><strong>Cause:</strong> No conventional commits since last release</p>
+                    <p><strong>Solution:</strong> Ensure commit messages use conventional format (feat:, fix:, etc.)</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>Issue: Attestation conflict error</h4>
+                    <p><strong>Cause:</strong> Both PyPI publishes trying to create .publish.attestation</p>
+                    <p><strong>Solution:</strong> Already fixed - Test PyPI has attestations: false</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>Issue: Docker build timeout</h4>
+                    <p><strong>Cause:</strong> Multi-platform builds are slow on cold cache</p>
+                    <p><strong>Solution:</strong> Wait ~5 minutes, cache will speed up subsequent builds</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>Issue: Self-assessment fails</h4>
+                    <p><strong>Cause:</strong> agentready CLI not installed in workflow environment</p>
+                    <p><strong>Solution:</strong> Workflow installs with <code>pip install -e .</code> before running</p>
+                </div>
+
+                <h3>Debug Commands</h3>
+                <pre><code># Check workflow status
+gh run list --workflow=release.yml
+
+# View specific run details
+gh run view &lt;run-id&gt;
+
+# Check PyPI package status
+curl -s https://pypi.org/pypi/agentready/json | jq '.info.version'
+
+# Verify Docker image
+docker pull ghcr.io/ambient-code/agentready:latest
+docker run --rm ghcr.io/ambient-code/agentready:latest --version
+
+# Check GitHub Pages deployment
+curl -I https://ambient-code.github.io/agentready/</code></pre>
+            </section>
+
+            <!-- Next Steps -->
+            <section id="next-steps">
+                <h2>🚀 Triggering Your First Release</h2>
+                <div class="info-box">
+                    <h4>Ready to Release?</h4>
+                    <p>Follow these steps to trigger your first automated release with all housekeeping features enabled.</p>
+                </div>
+
+                <h3>Release Checklist</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Verify you're on main branch</strong><br>
+                        <code>git branch --show-current</code> should show "main"
+                    </li>
+                    <li>
+                        <strong>Make a conventional commit</strong><br>
+                        <code>git commit -m "feat: trigger release to test new housekeeping features"</code>
+                    </li>
+                    <li>
+                        <strong>Push to trigger workflow</strong><br>
+                        <code>git push origin main</code>
+                    </li>
+                    <li>
+                        <strong>Watch workflow execution</strong><br>
+                        Visit <a href="https://github.com/ambient-code/agentready/actions/workflows/release.yml" target="_blank">GitHub Actions → Release</a>
+                    </li>
+                    <li>
+                        <strong>Verify all distributions</strong><br>
+                        Check PyPI, Test PyPI, Docker Hub, GitHub Pages, and self-assessment
+                    </li>
+                </ol>
+
+                <div class="success-box">
+                    <h4>Expected Outcome</h4>
+                    <p>After ~3-5 minutes, you should see:</p>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>New version on PyPI and Test PyPI</li>
+                        <li>Docker images on ghcr.io with new version tag</li>
+                        <li>Updated documentation on GitHub Pages</li>
+                        <li>Fresh self-assessment in examples/self-assessment/</li>
+                        <li>Comprehensive release summary in workflow logs</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>AgentReady Release Process Visualization</strong></p>
+            <p>Generated: <span id="timestamp"></span></p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">
+                🤖 Created with Claude Code |
+                <a href="https://github.com/ambient-code/agentready" style="color: #a0aec0;">GitHub</a> |
+                <a href="https://pypi.org/project/agentready/" style="color: #a0aec0;">PyPI</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#2d3748',
+                primaryBorderColor: '#5a67d8',
+                lineColor: '#4a5568',
+                secondaryColor: '#4299e1',
+                tertiaryColor: '#48bb78',
+                background: '#f7fafc',
+                mainBkg: '#edf2f7',
+                secondBkg: '#e2e8f0',
+                tertiaryBkg: '#cbd5e0',
+                noteBkgColor: '#fffaf0',
+                noteBorderColor: '#ed8936',
+                textColor: '#2d3748',
+                nodeTextColor: '#2d3748',
+                labelTextColor: '#2d3748',
+                edgeLabelBackground: '#ffffff',
+                clusterBkg: '#edf2f7',
+                clusterBorder: '#cbd5e0',
+                defaultLinkColor: '#4a5568',
+                titleColor: '#2d3748',
+                actorTextColor: '#2d3748',
+                signalTextColor: '#2d3748',
+                sequenceNumberColor: '#fff'
+            }
+        });
+
+        // Set timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>
