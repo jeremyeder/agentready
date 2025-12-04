@@ -1,0 +1,62 @@
+name: AgentReady PR Comment
+
+on:
+  workflow_run:
+    workflows: ["AgentReady Assessment"]
+    types:
+      - completed
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Download assessment report
+        uses: actions/download-artifact@v4
+        with:
+          name: agentready-reports
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download PR metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-metadata
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'report-latest.md';
+            const prNumberPath = 'pr-number.txt';
+
+            if (!fs.existsSync(reportPath)) {
+              console.log('No report found');
+              return;
+            }
+
+            if (!fs.existsSync(prNumberPath)) {
+              console.log('No PR number found');
+              return;
+            }
+
+            const report = fs.readFileSync(reportPath, 'utf8');
+            const prNumber = parseInt(fs.readFileSync(prNumberPath, 'utf8').trim());
+
+            // Post comment with assessment results
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+            console.log(`Posted assessment comment to PR #${prNumber}`);
