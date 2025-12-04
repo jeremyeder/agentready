@@ -1,3 +1,31 @@
+## [2.11.1](https://github.com/ambient-code/agentready/compare/v2.11.0...v2.11.1) (2025-12-04)
+
+
+### Performance Improvements
+
+* implement lazy loading for heavy CLI commands ([#151](https://github.com/ambient-code/agentready/issues/151)) ([6a7cd4e](https://github.com/ambient-code/agentready/commit/6a7cd4e147ebfdfc95921b86599a5b650db76153))
+
+# [2.11.0](https://github.com/ambient-code/agentready/compare/v2.10.1...v2.11.0) (2025-12-03)
+
+
+### Features
+
+* Add weekly research update skill and automation ([#145](https://github.com/ambient-code/agentready/issues/145)) ([7ba17a6](https://github.com/ambient-code/agentready/commit/7ba17a6b045251cbc9f26b5c2f4a0ec31d89dd11))
+
+## [2.10.1](https://github.com/ambient-code/agentready/compare/v2.10.0...v2.10.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* leaderboard workflow and SSH URL support ([#147](https://github.com/ambient-code/agentready/issues/147)) ([de28cd0](https://github.com/ambient-code/agentready/commit/de28cd0a6037a0951ba370aa73832553c088cfb8))
+
+# [2.10.0](https://github.com/ambient-code/agentready/compare/v2.9.0...v2.10.0) (2025-12-03)
+
+
+### Features
+
+* add ambient-code/agentready to leaderboard ([#148](https://github.com/ambient-code/agentready/issues/148)) ([621152e](https://github.com/ambient-code/agentready/commit/621152e46bd8e9505e3bc1775d2cd61a80af5a62))
+
 # [2.9.0](https://github.com/ambient-code/agentready/compare/v2.8.1...v2.9.0) (2025-12-03)
 
 

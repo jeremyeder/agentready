@@ -86,8 +86,8 @@ def submit(repository, assessment_file, dry_run):
         click.echo(f"Error: Invalid assessment JSON (missing {e})", err=True)
         sys.exit(1)
 
-    # 4. Extract org/repo from URL
-    if "github.com/" not in repo_url:
+    # 4. Extract org/repo from URL (handle both HTTPS and SSH formats)
+    if "github.com" not in repo_url:
         click.echo(
             "Error: Only GitHub repositories are supported for the leaderboard",
             err=True,
@@ -96,7 +96,13 @@ def submit(repository, assessment_file, dry_run):
         sys.exit(1)
 
     try:
-        org_repo = repo_url.split("github.com/")[1].strip("/").rstrip(".git")
+        # Handle SSH format: git@github.com:org/repo.git
+        if repo_url.startswith("git@github.com:"):
+            org_repo = repo_url.split("git@github.com:")[1].rstrip(".git")
+        # Handle HTTPS format: https://github.com/org/repo.git
+        else:
+            org_repo = repo_url.split("github.com/")[1].strip("/").rstrip(".git")
+
         org, repo = org_repo.split("/")
     except (IndexError, ValueError):
         click.echo(f"Error: Could not parse GitHub repository from URL: {repo_url}")
@@ -157,8 +163,8 @@ def submit(repository, assessment_file, dry_run):
             click.echo(f"Error: Cannot access repository {org_repo}: {e}", err=True)
         sys.exit(1)
 
-    # 8. Fork agentready/agentready (if not already forked)
-    upstream_repo = "agentready/agentready"
+    # 8. Fork ambient-code/agentready (if not already forked)
+    upstream_repo = "ambient-code/agentready"
     try:
         upstream = gh.get_repo(upstream_repo)
         click.echo(f"Found upstream: {upstream_repo}")
