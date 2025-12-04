@@ -10,9 +10,9 @@ title: Home
 <div class="hero">
   <p class="hero-tagline">One command to agent-ready infrastructure. Transform your repository with automated GitHub setup, pre-commit hooks, CI/CD workflows, and continuous quality tracking.</p>
   <div class="hero-buttons">
-    <a href="user-guide.html#bootstrap-your-repository" class="button button-primary">Bootstrap Your Repo</a>
-    <a href="user-guide.html#running-assessments" class="button button-secondary">Run Assessment</a>
-    <a href="leaderboard.html" class="button button-tertiary">🏆 Leaderboard</a>
+    <a href="user-guide.html#bootstrap-your-repository" class="button button-primary">⚡ Bootstrap</a>
+    <a href="user-guide.html#align-command" class="button button-secondary">🔧 Align</a>
+    <a href="user-guide.html#running-assessments" class="button button-tertiary">📊 Assess</a>
   </div>
 </div>
 
@@ -20,13 +20,18 @@ title: Home
 
 AI-assisted development tools like Claude Code, GitHub Copilot, and Cursor AI work best with well-structured, documented codebases. AgentReady **builds the infrastructure** you need and **continuously assesses** your repository across **25 research-backed attributes** to ensure lasting AI effectiveness.
 
-### Two Powerful Modes
+### Three Powerful Modes
 
 <div class="feature-grid">
   <div class="feature">
-    <h3>⚡ Bootstrap (Automated)</h3>
+    <h3>⚡ Bootstrap (Automated Setup)</h3>
     <p><strong>One command to complete infrastructure.</strong> Generates GitHub Actions workflows, pre-commit hooks, issue/PR templates, Dependabot config, and development standards tailored to your language.</p>
     <p><strong>When to use:</strong> New projects, repositories missing automation, or when you want instant best practices.</p>
+  </div>
+  <div class="feature">
+    <h3>🔧 Align (Automated Remediation)</h3>
+    <p><strong>Automatically fix assessment failures.</strong> Creates missing files (CLAUDE.md, README), configures pre-commit hooks, updates .gitignore, and applies best practices to boost your score instantly.</p>
+    <p><strong>When to use:</strong> After assessment, to automatically remediate issues and improve score without manual work.</p>
   </div>
   <div class="feature">
     <h3>📊 Assess (Diagnostic)</h3>
@@ -97,6 +102,29 @@ git push
 - ✅ Dependabot automation (weekly dependency updates)
 - ✅ Contributing guidelines and Code of Conduct
 - ✅ Automatic AgentReady assessment on every PR
+
+### Align Workflow (Score Booster)
+
+```bash
+# Assess first to see current state
+agentready assess .
+
+# Automatically fix issues to improve score
+agentready align --dry-run .  # Preview changes first
+agentready align .            # Apply fixes
+
+# Re-assess to see improvements
+agentready assess .
+```
+
+**What align does automatically:**
+
+- ✅ Creates missing CLAUDE.md with project context template
+- ✅ Creates/updates README.md with proper structure
+- ✅ Adds pre-commit hooks configuration
+- ✅ Updates .gitignore with language-specific patterns
+- ✅ Creates .gitattributes for consistent line endings
+- ✅ Boosts your score by 20-40 points in seconds
 
 ### Manual Assessment Workflow
 
