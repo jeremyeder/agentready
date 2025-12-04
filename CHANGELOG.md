@@ -1,3 +1,10 @@
+## [2.12.1](https://github.com/jeremyeder/agentready/compare/v2.12.0...v2.12.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* add pre-commit templates for all supported languages ([#158](https://github.com/jeremyeder/agentready/issues/158)) ([aaa29ee](https://github.com/jeremyeder/agentready/commit/aaa29eec461eb96c69e22b4f03c694ba582b7d23))
+
 # [2.12.0](https://github.com/jeremyeder/agentready/compare/v2.11.0...v2.12.0) (2025-12-04)
 
 
