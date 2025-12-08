@@ -17,6 +17,15 @@
     },
     {
       "pattern": "^\\{\\{.*\\}\\}$"
+    },
+    {
+      "pattern": "^/agentready/"
+    },
+    {
+      "pattern": "^/demos/"
+    },
+    {
+      "pattern": "^/tbench"
     }
   ],
   "timeout": "20s",
