@@ -1,36 +1,27 @@
 {
   "ignorePatterns": [
     {
+      "pattern": "^file://.*\\{\\{.*\\}\\}"
+    },
+    {
       "pattern": "^http://localhost"
     },
     {
-      "pattern": "^https://github.com/.*/issues/new"
+      "pattern": "^https://localhost"
     },
     {
-      "pattern": "\\.html"
+      "pattern": "^file://.*#.*"
     },
     {
-      "pattern": "^https://github.com/ambient-code/agentready/discussions"
-    },
-    {
-      "pattern": "^https://github.com/ambient-code/agentready/blob/main/LICENSE"
-    },
-    {
-      "pattern": "^\\{\\{.*\\}\\}$"
-    },
-    {
-      "pattern": "^/agentready/"
-    },
-    {
-      "pattern": "^/demos/"
-    },
-    {
-      "pattern": "^/tbench"
+      "pattern": "\\{\\{.*\\}\\}"
     }
   ],
+  "replacementPatterns": [],
+  "httpHeaders": [],
   "timeout": "20s",
   "retryOn429": true,
   "retryCount": 3,
   "fallbackRetryDelay": "30s",
-  "aliveStatusCodes": [200, 206, 301, 302, 308]
+  "aliveStatusCodes": [200, 206, 301, 302, 303, 307, 308, 403],
+  "ignoreUrls": []
 }
